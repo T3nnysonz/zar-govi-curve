@@ -2,9 +2,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def interpolate(datapoints, grain = 10):
+    # grain: Integer, how fine the interpolation should be
+    
+    # These lines ensure grain is an integer greater than 1
     grain = np.floor(grain)
     if grain<1:
         grain = 1
+    
+    
     # Generates 10 interpolated datapoints between inputted datapoints
     pillars_t, pillars_df = zip(*datapoints)
     new_pillars_t = []
@@ -33,4 +38,3 @@ def plot(datapoints):
 
 data = [(0,1), (1,0.5)]
 plot(interpolate(data))
-#interpolate(data)
