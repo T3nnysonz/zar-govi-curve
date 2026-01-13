@@ -41,4 +41,4 @@ def plot(datapoints):
     return 0
 
 data = [(0,1), (1,0.9), (2,0.75),(3,0.4),(4,0.1)]
-plot(interpolate(data))
+plot(interpolate(data, 10))
