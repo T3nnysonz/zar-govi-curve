@@ -1,19 +1,31 @@
 from datetime import date
 import pandas as pd
 
-def generate_cashflows(settle_date, mature_date, coupon_freq, coupon_rate, face_value = 100): # The accepted standard is apparently to record cashflows as (date, cashflow)
+def generate_cashflows(settle_date, mature_date, coupon_rate, coupon_freq = 2, face_value = 100): # The accepted standard is apparently to record cashflows as (date, cashflow)    
     cashflows = []
     
-    working_date = mature_date
+    if(coupon_rate == 0):
+        #if(initial_payments):
+        #    cashflows.append((settle_date, -face_value))
+        cashflows.append((mature_date, face_value))
+        return cashflows;
+    else:
     
-    while(working_date>settle_date):
-        working_date = (pd.Timestamp(working_date) - pd.DateOffset(months=(12//coupon_freq))).date()
-        coupon_payment = round(face_value*(coupon_rate/coupon_freq), 5)
-        cashflows.append((working_date, coupon_payment))
+        working_date = mature_date
     
-    cashflows.append((mature_date, face_value))
+        while(working_date>settle_date):
+            coupon_payment = round(face_value*(coupon_rate/coupon_freq), 5)
+            cashflows.append((working_date, coupon_payment))
+            working_date = (pd.Timestamp(working_date) - pd.DateOffset(months=(12//coupon_freq))).date()
     
-    return sorted(cashflows);
+        #accrued_period = (settle_date-working_date).days
+        #accrued_interest = face_value*(accrued_period/365.0)*coupon_rate
+    
+        #if(initial_payments):
+        #    cashflows.append((settle_date, -(face_value+accrued_interest)))
+        cashflows.append((mature_date, face_value))
+    
+        return sorted(cashflows);
 
 def price_from_curve():
     return 0;
