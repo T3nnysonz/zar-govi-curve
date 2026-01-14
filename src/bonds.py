@@ -3,14 +3,11 @@ import pandas as pd
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.daycount import year_fraction
-import src.curve
 
 def generate_cashflows(settle_date, mature_date, coupon_rate, coupon_freq = 2, face_value = 100): # The accepted standard is apparently to record cashflows as (date, cashflow)    
     cashflows = []
     
     if(coupon_rate == 0):
-        #if(initial_payments):
-        #    cashflows.append((settle_date, -face_value))
         cashflows.append((mature_date, face_value))
         return cashflows;
     else:
@@ -22,11 +19,6 @@ def generate_cashflows(settle_date, mature_date, coupon_rate, coupon_freq = 2, f
             cashflows.append((working_date, coupon_payment))
             working_date = (pd.Timestamp(working_date) - pd.DateOffset(months=(12//coupon_freq))).date()
     
-        #accrued_period = (settle_date-working_date).days
-        #accrued_interest = face_value*(accrued_period/365.0)*coupon_rate
-    
-        #if(initial_payments):
-        #    cashflows.append((settle_date, -(face_value+accrued_interest)))
         cashflows.append((mature_date, face_value))
     
         return sorted(cashflows);
@@ -38,3 +30,19 @@ def price_from_curve(settle_date, cashflows, discount_curve):
         df = discount_curve.calcDF(time)
         pv += amount*df
     return pv;
+
+def accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_value = 100, coupon_freq = 2):
+    
+    # Assumes that the value of the coupon is accrued linearly
+    
+    accrued_period = (settle_date-last_coupon).days # How long since last coupon issue.
+    full_accrue = (next_coupon-last_coupon).days # Full gap between coupons.
+    full_coupon = face_value * (coupon_rate/coupon_freq) # How much a full coupon payout would be.
+    fraction = accrued_period/full_accrue # What fraction of the current accruation period has been completed.
+    accrued_interest = full_coupon * fraction  # The correct fraction of the accruement of the full coupon.
+    
+    return accrued_interest;
+
+def dirty_price(clean_price, settle_date, last_coupon, next_coupon, coupon_rate, face_value = 100):
+    dirty_price = clean_price + accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_value)
+    return dirty_price;
