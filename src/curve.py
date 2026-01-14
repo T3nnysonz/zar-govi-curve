@@ -9,7 +9,7 @@ class DiscountCurve:
         self.dfs = np.array(pillars_df, dtype=float)
         self.interpolation = interpolation
         
-    def interpolate(this, grain = 10):
+    def interpolate(self, grain = 10):
         # datapoints: array of tuples, each tuple should be of form (float, float) and containts
         # in order the time of the datapoint and the difference factor at that time
         # grain: Integer, how fine the interpolation should be
@@ -22,25 +22,25 @@ class DiscountCurve:
     
         # Generates interpolated datapoints between inputted datapoints
         new_pillars_t = []
-        log_df = np.log(this.pillars_df) # preparing for linearly interpolating between log of datapoints
+        log_df = np.log(self.dfs) # preparing for linearly interpolating between log of datapoints
         new_pillars_df = []
-        for t in range(len(this.pillars_t)-1): # For every time pillar
-            interval_length = this.pillars_t[t+1]-this.pillars_t[t] # Find distance to next time pillar
+        for t in range(len(self.times)-1): # For every time pillar
+            interval_length = self.times[t+1]-self.times[t] # Find distance to next time pillar
             df_difference = log_df[t+1]-log_df[t] # Calculate difference in DF values at the time pillars
             for i in range(grain): # linearly adds datapoints between the pillars
-                new_pillars_t.append(this.pillars_t[t]+(i/grain)*interval_length)
+                new_pillars_t.append(self.times[t]+(i/grain)*interval_length)
                 new_pillars_df.append(log_df[t]+(i/grain)*df_difference)
-        new_pillars_t.append(this.pillars_t[-1])
-        new_pillars_df.append(np.log(this.pillars_df[-1]))
+        new_pillars_t.append(self.times[-1])
+        new_pillars_df.append(np.log(self.dfs[-1]))
     
         new_pillars_df = np.exp(new_pillars_df) #reverts the logarithmic data into standard data
         new_data = zip(new_pillars_t, new_pillars_df) # recombines the time and DFs
         
-        #this.pillars_df = new_pillars_df
-        #this.pillars_t = new_pillars_t
+        self.dfs = new_pillars_df
+        self.times = new_pillars_t
         return new_data
 
-    def caclDF(self, t):
+    def calcDF(self, t):
         # The idea behind this function is to find which 2 time pillars surround the t we are
         # interested in. Then we use log-linear interpolation to find the correct df value.
         
@@ -62,8 +62,8 @@ class DiscountCurve:
         elif(i==-1): # Edge case, is only triggered in the event that t = 0
             return 1;
         
-        before_df = self.dfs[i] # These lines index the corresponding discount factors
-        after_df = self.dfs[i+1]
+        before_df = self.dfs[i-1] # These lines index the corresponding discount factors
+        after_df = self.dfs[i]
         
         prop_dist = (t-before)/(after-before) # Calculates how far we are between the time pillars
         log_before = np.log(before_df) # Converts discount factors to logarithms
@@ -90,6 +90,3 @@ class DiscountCurve:
         plt.grid()
         plt.show()
         return 0
-
-df = DiscountCurve([(0,1),(1,0.75),(2,0.5),(3,0.25)])
-print(df.caclDF(10))

@@ -1,9 +1,9 @@
 from datetime import date
 import pandas as pd
-#import sys, os
-#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from daycount import year_fraction
-import curve
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.daycount import year_fraction
+import src.curve
 
 def generate_cashflows(settle_date, mature_date, coupon_rate, coupon_freq = 2, face_value = 100): # The accepted standard is apparently to record cashflows as (date, cashflow)    
     cashflows = []
