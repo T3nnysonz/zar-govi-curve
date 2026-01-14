@@ -1,5 +1,9 @@
 from datetime import date
 import pandas as pd
+#import sys, os
+#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from daycount import year_fraction
+import curve
 
 def generate_cashflows(settle_date, mature_date, coupon_rate, coupon_freq = 2, face_value = 100): # The accepted standard is apparently to record cashflows as (date, cashflow)    
     cashflows = []
@@ -27,5 +31,10 @@ def generate_cashflows(settle_date, mature_date, coupon_rate, coupon_freq = 2, f
     
         return sorted(cashflows);
 
-def price_from_curve():
-    return 0;
+def price_from_curve(settle_date, cashflows, discount_curve):
+    pv = 0
+    for date, amount in cashflows:
+        time = year_fraction(settle_date, date)
+        df = discount_curve.calcDF(time)
+        pv += amount*df
+    return pv;

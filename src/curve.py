@@ -41,20 +41,39 @@ class DiscountCurve:
         return new_data
 
     def caclDF(self, t):
-        before = 0
-        after = 0
+        # The idea behind this function is to find which 2 time pillars surround the t we are
+        # interested in. Then we use log-linear interpolation to find the correct df value.
+        
+        before = 0 # will be used to find the latest time pillar before t
+        after = 0 # will be used to find the earliest time pillar after t
+        i = -1 # will be used to index the Discount Factor array later
         for time in self.times:
-            if(before <= t and t <= after):
+            if(before <= t and t <= after): # Checks if we have surrounded t, this method produces an edge case
                 break
-            else:
+            else: # Iterates
                 before = after
                 after = time
-        if(before > t):
-            return 1
-        elif(t>after):
+                i+=1
+        if(before > t): # This works correctly by accident. No need to fix it, however.
+            return 1;
+        elif(t>after): # If a t value outside the Discount Factors range is inputted use the
+                       # last recorded discount factor
             return self.dfs[-1]
+        elif(i==-1): # Edge case, is only triggered in the event that t = 0
+            return 1;
         
-        df = 0
+        before_df = self.dfs[i] # These lines index the corresponding discount factors
+        after_df = self.dfs[i+1]
+        
+        prop_dist = (t-before)/(after-before) # Calculates how far we are between the time pillars
+        log_before = np.log(before_df) # Converts discount factors to logarithms
+        log_after = np.log(after_df)
+        log_diff = log_after-log_before
+        
+        log_df = log_before + log_diff*prop_dist # log_diff*prop_dist is the distance between the
+        # df pillars that corresponds to the distance between time pillars required.
+        
+        df = np.exp(log_df)
         return df
 
     def plot(self, interpolated = False):
