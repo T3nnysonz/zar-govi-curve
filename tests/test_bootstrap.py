@@ -7,36 +7,31 @@ from src.curve import DiscountCurve
 bond1 = {
     'mature_date': date(2026, 6, 15),
     'coupon_rate': 0.05,
-    'clean_price': 97,
-    'face_value': 100
+    'clean_price': 97
 }
 
 bond2 = {
     'mature_date': date(2026, 12, 15),
     'coupon_rate': 0.06,
-    'clean_price': 99.5,
-    'face_value': 100
+    'clean_price': 99.5
 }
 
 bond3 = {
     'mature_date': date(2025, 12, 15),
     'coupon_rate': 0.055,
-    'clean_price': 98,
-    'face_value': 100
+    'clean_price': 98
 }
 
 bond4 = {
     'mature_date': date(2027, 6, 15),
     'coupon_rate': 0.07,
-    'clean_price': 100,
-    'face_value': 100
+    'clean_price': 100
 }
 
 bond5 = {
     'mature_date': date(2025, 6, 15),
     'coupon_rate': 0,
-    'clean_price': 99,
-    'face_value': 100
+    'clean_price': 99
 }
 
 bonds = [bond1, bond2, bond3, bond4, bond5]

@@ -44,6 +44,9 @@ def accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_va
     
     return accrued_interest;
 
-def dirty_price(clean_price, settle_date, last_coupon, next_coupon, coupon_rate, face_value = 100):
-    dirty_price = clean_price + accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_value)
+def dirty_price(clean_price, settle_date, last_coupon, next_coupon, coupon_rate, face_value = 100, version = "normal"):
+    if version == "normal":
+        dirty_price = clean_price + accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_value)
+    else:
+        dirty_price = clean_price + 0.5 * face_value * coupon_rate * 0.5
     return dirty_price;
