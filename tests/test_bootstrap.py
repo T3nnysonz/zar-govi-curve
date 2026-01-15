@@ -1,0 +1,44 @@
+from datetime import date
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.bootstrap import bootstrap_govi_curve
+
+bond1 = {
+    'mature_date': date(2026, 6, 15),
+    'coupon_rate': 0.05,
+    'clean_price': 97,
+    'face_value': 100
+}
+
+bond2 = {
+    'mature_date': date(2026, 12, 15),
+    'coupon_rate': 0.06,
+    'clean_price': 99.5,
+    'face_value': 100
+}
+
+bond3 = {
+    'mature_date': date(2025, 12, 15),
+    'coupon_rate': 0.055,
+    'clean_price': 98,
+    'face_value': 100
+}
+
+bond4 = {
+    'mature_date': date(2027, 6, 15),
+    'coupon_rate': 0.07,
+    'clean_price': 100,
+    'face_value': 100
+}
+
+bond5 = {
+    'mature_date': date(2025, 6, 15),
+    'coupon_rate': 0.062,
+    'clean_price': 99,
+    'face_value': 100
+}
+
+bonds = [bond1, bond2, bond3, bond4, bond5]
+settle_date = date(2025, 1, 16)
+
+bootstrap_govi_curve(bonds, settle_date)
