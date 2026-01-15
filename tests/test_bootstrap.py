@@ -2,6 +2,7 @@ from datetime import date
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.bootstrap import bootstrap_govi_curve
+from src.curve import DiscountCurve
 
 bond1 = {
     'mature_date': date(2026, 6, 15),
@@ -39,6 +40,13 @@ bond5 = {
 }
 
 bonds = [bond1, bond2, bond3, bond4, bond5]
-settle_date = date(2025, 1, 16)
+settle_date = date(2024, 12, 15)
 
-bootstrap_govi_curve(bonds, settle_date)
+data = bootstrap_govi_curve(bonds, settle_date)
+#print(data)
+graph = DiscountCurve(data)
+graph.plot()
+
+#a, b = zip(*[(0,1)])
+#print(a)
+#print(b)
