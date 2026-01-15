@@ -34,19 +34,14 @@ bond4 = {
 
 bond5 = {
     'mature_date': date(2025, 6, 15),
-    'coupon_rate': 0.062,
+    'coupon_rate': 0,
     'clean_price': 99,
     'face_value': 100
 }
 
 bonds = [bond1, bond2, bond3, bond4, bond5]
-settle_date = date(2024, 12, 15)
+settle_date = date(2024,12, 15)
 
 data = bootstrap_govi_curve(bonds, settle_date)
-#print(data)
 graph = DiscountCurve(data)
 graph.plot()
-
-#a, b = zip(*[(0,1)])
-#print(a)
-#print(b)

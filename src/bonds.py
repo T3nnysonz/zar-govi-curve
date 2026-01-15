@@ -13,13 +13,14 @@ def generate_cashflows(settle_date, mature_date, coupon_rate, coupon_freq = 2, f
     else:
     
         working_date = mature_date
+        cashflows.append((mature_date, round(face_value*(1+coupon_rate/coupon_freq),5)))
+        working_date = (pd.Timestamp(working_date) - pd.DateOffset(months=(12//coupon_freq))).date()
     
         while(working_date>settle_date):
             coupon_payment = round(face_value*(coupon_rate/coupon_freq), 5)
             cashflows.append((working_date, coupon_payment))
             working_date = (pd.Timestamp(working_date) - pd.DateOffset(months=(12//coupon_freq))).date()
     
-        cashflows.append((mature_date, face_value))
     
         return sorted(cashflows);
 
