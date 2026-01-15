@@ -23,10 +23,10 @@ def generate_cashflows(settle_date, mature_date, coupon_rate, coupon_freq = 2, f
     
         return sorted(cashflows);
 
-def price_from_curve(settle_date, cashflows, discount_curve):
+def price_from_curve(settle_date, cashflows, discount_curve, day_count = "ACT/365F"):
     pv = 0
     for date, amount in cashflows:
-        time = year_fraction(settle_date, date)
+        time = year_fraction(settle_date, date, day_count)
         df = discount_curve.calcDF(time)
         pv += amount*df
     return pv;

@@ -45,5 +45,3 @@ Note 2: In the alternate case that compounding is done continously then it is ap
 $ DF = e^{-r\times t}$
 
 As continuous compounding is the compounding method used in actual finance, the exponential formula is the most appropriate for financial settings.
-
-3

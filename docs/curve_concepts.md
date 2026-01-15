@@ -14,13 +14,13 @@
 
  The present value of the bond after the full payout is equal to:
 
- $$ PV = \sum_{t=1}^n \frac{CR\times P}{(1+ZR(t))^t}+\frac{P}{(1+ZR(t))^n}$$
+ $$ PV = \sum_{t=1}^n \frac{CR\times F}{(1+ZR(t))^t}+\frac{F}{(1+ZR(n))^n}$$
 
  Where:
 
  - PV is the present value of the bond.
  - CR is the coupon rate offered by the bond.
- - P is the principal investment of the bond.
+ - F is the face value of the bond.
  - ZR(t) is the Zero Rate t years after the isuueing of the bond.
  - n is the duration of the bond in years.
 
