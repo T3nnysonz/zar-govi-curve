@@ -158,10 +158,3 @@ class DiscountCurve:
         self.interpolation = interpolation
         
         self.validate();
-
-#test = DiscountCurve([(0,1),(1,0.1)])
-#test.plot_zero_rates()
-#t, d = zip(*test.interpolate())
-#print(d)
-#print("times")
-#print(t)
