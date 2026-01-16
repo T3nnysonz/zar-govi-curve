@@ -4,14 +4,12 @@ import pandas as pd
 from src.daycount import year_fraction
 from src.curve import DiscountCurve
 
-def bootstrap_govi_curve(bonds, settlement_date, conventions = None, type = "Year_Fractions"):
+def bootstrap_govi_curve(bonds, settlement_date, conventions = None, type = "Year_Fractions", bounds = None):
     
     sorted_bonds = sorted(bonds, key= lambda b: b['mature_date']) ## Sorts bonds by maturity date
     
     DF_data = [(settlement_date, 1)] # DF_data and known_dfs are very similar with the only difference
     known_dfs = [(0,1)] # Being that known_dfs holds year fractions while DF_data holds dates
-    
-    df = DiscountCurve(known_dfs)
     
     conventions = getConventions(conventions); # Method built at the bottom of this file
     
@@ -19,6 +17,9 @@ def bootstrap_govi_curve(bonds, settlement_date, conventions = None, type = "Yea
     freq = conventions["coupon_frequency"]
     face_value = conventions["face_value"]
     accrue_method = conventions["accrued_method"]
+    interpolation_method = conventions["interpolation_method"]
+    
+    df = DiscountCurve(known_dfs, bounds=bounds, interpolation=interpolation_method)
     
     for bond in sorted_bonds: # Go through the bonds from shortest to longest
         known = 0 # This parameter will contain the part of the dirty price that we know already

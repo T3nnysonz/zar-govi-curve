@@ -2,7 +2,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class DiscountCurve:
-    def __init__(self, datapoints, interpolation="log_linear"):
+    def __init__(self, datapoints, interpolation="log_linear", bounds = None):
+        
+        if bounds is None:
+            bounds = {
+                'min_rate': 0.0,     # Rates shouldn't be negative (usually)
+                'max_rate': 0.50,    # 50% maximum (adjust for hyperinflation markets)
+                'min_df': 0.001,      # Discount factors shouldn't be near zero
+                'max_df': 1.01,       # Discount factors may barely go above 1 for overnight market differences
+            }
+        self.bounds = bounds
+        
         datapoints = sorted(datapoints) # Sorts data by time since settlement date
         # Convert to numpy arrays for easier maths
         pillars_t, pillars_df = zip(*datapoints)
@@ -25,7 +35,6 @@ class DiscountCurve:
     
         # Generates interpolated datapoints between inputted datapoints
         if(self.interpolation == "log_linear"):
-            print("log")
             new_pillars_t = []
             log_df = np.log(self.dfs) # preparing for linearly interpolating between log of datapoints
             new_pillars_df = []
@@ -41,11 +50,13 @@ class DiscountCurve:
             new_pillars_df = np.exp(new_pillars_df) #reverts the logarithmic data into standard data
             new_data = zip(new_pillars_t, new_pillars_df) # recombines the time and DFs
         
+            print(new_data)
             return new_data
         elif(self.interpolation == "linear"):
             return zip(self.times, self.dfs)
         else:
             print("Unknown interpolation method, used linear interpolation instead.")
+            return zip(self.times, self.dfs)
 
     def calcDF(self, t):
         # The idea behind this function is to find which 2 time pillars surround the t we are
@@ -98,9 +109,36 @@ class DiscountCurve:
         plt.show()
         return 0
     
+    def plot_zero_rates(self, interpolation = "log_linear"):
+        datapoints = self.interpolate()
+        
+        rates = []
+        times = []
+        for time, df in datapoints:
+            times.append(time)
+            if(time == 0):
+                rates.append(0)
+            else:
+                rate = 1/np.power(df,1/time)-1
+                if rate < self.bounds['min_rate']:
+                    raise ValueError(f"Warning: Rate {rate:.2%} at t={time:.2f} below minimum")
+                if rate > self.bounds['max_rate']:
+                    raise ValueError(f"Warning: Rate {rate:.2%} at t={time:.2f} above maximum")
+                rates.append(rate)
+        plt.plot(times, rates)
+        plt.xlabel('Time (years)')
+        plt.ylabel('Zero Rate')
+        plt.title('Zero Rate Curve')
+        plt.grid()
+        plt.show()
+        return 0
+    
     def validate(self):
-        if(min(self.dfs <= 0)):
-            raise ValueError(f"Warning: Discount Factors may not be less than or equal to zero.")
+            
+        if(min(self.dfs) < self.bounds["min_df"]):
+            raise ValueError(f"Warning: Provided discount factors exceed tolerated bounds: {min(self.dfs)} < {self.bounds["min_df"]}")
+        if(max(self.dfs) > self.bounds["max_df"]):
+            raise ValueError(f"Warning: Provided discount factors exceed tolerated bounds: {max(self.dfs)} > {self.bounds["max_df"]}")
         if(min(self.times < 0)):
             raise ValueError(f"Warning: Pillar times may not be less than to zero.")
         if(self.times[0]!=0):
@@ -110,8 +148,6 @@ class DiscountCurve:
         for i in range(len(self.times)-1):
             if self.dfs[i]<self.dfs[i+1]:
                 raise ValueError(f"Warning, discount provided are not decreasing.")
-        
-        print("Valid curve, continue.")
     
     def update_data(self, datapoints, interpolation = "log_linear"):
         datapoints = sorted(datapoints) # Sorts data by time since settlement date
@@ -122,3 +158,10 @@ class DiscountCurve:
         self.interpolation = interpolation
         
         self.validate();
+
+#test = DiscountCurve([(0,1),(1,0.1)])
+#test.plot_zero_rates()
+#t, d = zip(*test.interpolate())
+#print(d)
+#print("times")
+#print(t)

@@ -35,8 +35,9 @@ bond5 = {
 }
 
 bonds = [bond1, bond2, bond3, bond4, bond5]
-settle_date = date(2024,12, 15)
+settle_date = date(2025,3, 15)
 
-data = bootstrap_govi_curve(bonds, settle_date)
-graph = DiscountCurve(data)
+data = bootstrap_govi_curve(bonds, settle_date, bounds=None, conventions= None)
+graph = DiscountCurve(data) # This should in theory already be validated
 graph.plot()
+graph.plot_zero_rates()
