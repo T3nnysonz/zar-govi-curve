@@ -1,6 +1,6 @@
 # Cashflow Schedule
 
-Money does not sit idly. Therefore when predicting the financial situation of any entity it's important to consider the movement of money. This naturally has to be estimated as it is impossible to see the future, but the general strategy is to clearly document all predicted gains and losses of money, which are called **cash inflows** and **cash outflows.**
+Money does not sit idly. Therefore when predicting the financial situation of any entity it's important to consider the movement of money. This naturally has to be estimated as it is impossible to see the future, but the general strategy is to clearly document all predicted gains and losses of money, which are called **cash inflows** and **cash outflows.** In the case of bonds, the movement of money is simple enough that there is no estimation in the cash inflows and outflows.
 
 ### Cash Inflows
 
@@ -59,3 +59,7 @@ $$ DP = CP + AI $$
 * AI = Accrued Interest
 
 **Bootstrapping formula uses Dirty Prices**
+
+# Other Documents:
+previous : - [Curve Concepts](curve_concepts.md) - Zero curves, Par yield curves, Discount Factor Curves, Interpolation methods.
+next: - [Bootstrapping Algorithm](bootstrap.md) - What Bootstrapping is and how to perform it.

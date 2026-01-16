@@ -2,13 +2,13 @@
 
 ## Zero curve
 
- The interest accumulated on a **Zero-coupon bond** is usually variable with time. Therefore, it is useful to keep track of the interest rate on a Zero-coupon bond throughout its lifespan. This is done through the **Zero curve,** which plots the interest rate on the bond as a function of the amount of time since the issueing of the bond.
+ The interest accrued on a **Zero-coupon bond** is usually variable with time. Therefore, it is useful to keep track of the interest rate on a Zero-coupon bond throughout its lifespan. This is done through the **Zero curve,** which plots the interest rate on the bond as a function of the amount of time since the issueing of the bond.
 
  # Par yield curve:
 
  ## Par yield
 
- Most bonds are issued with the assumption that coupons will be paid as the bonds matures. However, at the end of the bonds maturity, the principal must also be paid pack. Before issueing the bond, we may calculate the present value of the total payout of the bond, (principal and coupons) as a function of the percentage of the principal that the coupon is priced at. The **par yield** is the coupon rate that results in the present value of the bond payout equalling the principal payment of the bond.
+ Unlike zero-coupon bonds, most bonds are issued with the assumption that coupons will be paid while the bonds matures. However, at the end of the bonds maturity, the principal must also be paid pack. Before issueing the bond, we may calculate the present value of the total payout of the bond, (principal and coupons) as a function of the percentage of the principal that the coupon is priced at. The **par yield** is the coupon rate that results in the present value of the bond payout equalling the principal payment of the bond. (Price = Face Value)
 
  ### Calculation of the par yield
 
@@ -27,7 +27,7 @@
  The 2'nd term is the present value of the principal of the bond.
  The first term is the sum of the present values of all the coupons issued throughout the bond.
 
- To find the par yield, we want the principal = present value. On simplifying, this reduces to:
+ To find the par yield, we want Face Value = Present Value = Price. On simplifying, this reduces to:
 
  $$ 1 =  \sum_{t=1}^n \frac{CR}{(1+ZR(t))^t} + \frac{1}{(1+ZR(n))^n}$$
 
@@ -46,7 +46,7 @@ As the **discount factor** is calculated solely through the interest/zero rate, 
 # Interpolation Choices and Tradeoffs
 
 ### Context:
-In all curve graphs, the exact value of the graph is only known/calculated at very specific timepoints known as **pillars.** The graph values between any 2 pillars must then be interpolated to allow for a more universally useful graph. But there is no correct interpolation technique, ans thus the pros and cons of several methods should be known. Also, this is all primarily done for **Discount Factor Graphs.**
+In all curve graphs, the exact value of the graph is only known/calculated at very specific timepoints known as **pillars.** The graph values between any 2 pillars must then be interpolated to allow for a useable graph. But there is no correct interpolation technique, ans thus the pros and cons of several methods should be known. This is all primarily done for **Discount Factor Graphs,** but is also sometimes done for **zero curves.**
 
 ### Linear on Discount Factors
 This is the simplest interpolation method, where we assume that the difference factor changes linearly between 2 consecutive pillars. This assumption, while incorrect and naive, does a relatively good job at modelling the interpolation. This is because the linearity forces monotonicity of the discount factor between pillars, and ensures that the DF never leaves the range 0-1.
@@ -54,7 +54,7 @@ This is the simplest interpolation method, where we assume that the difference f
 On the other hand, **Linear on DF** may lead to discontinuous forward rates and the final graph will end up jagged which is both unappealing to look at but also slighty innacurate.
 ### Log-Linear on Discount Factors
 
-This is the most commonly used interpolation method in finance. For a slight increase in computational difficulty, (which is merely running linear interpolation on a modified rather than raw dataset) the benefits of the **Linear on DF** method are retained while also being smoother, (marginally) more realistic of a model, and also keeps the forward rate constant between 2 pillars.
+This is the most commonly used interpolation method in finance. For a slight increase in computational difficulty, (which is merely running linear interpolation on a modified rather than raw dataset) the benefits of the **Linear on DF** method are retained while also being marginally smoother, more realistic of a model, and also keeps the forward rate constant between 2 pillars.
 
 ### Cubic Spline on Log Discount Factors
 
@@ -75,4 +75,8 @@ It is however by far the most complicated method to implement and also runs slow
 
 ## Project
 
-With regard to the curve engine, **Log-DF** interpolation will be used due to the need to implement the method within the 2 week time constraint and the relative high quality of the interpolation provided.
+With regard to the curve engine, **Log-DF** interpolation will be defaulted to used to the high quality curve it produces relative to the complexity of the code behind it. The code also however supports linear interpolation.
+
+# Other Documents:
+previous : - [Time Value of Money](tvm.md) - Future Values, Discounting & Discount Factors
+next: - [Bond Pricing](bond_pricing.md) - Cash flows, Coupon conevntions, clean/dirty prices  

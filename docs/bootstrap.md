@@ -18,4 +18,8 @@ $$ DF = \frac{Dirty Price}{Face Value}$$
      $$ PV = \sum_{i=1}^{k+1} Cashflow(t_i)*DF(t_i) $$
      which in this case becomes:
      $$ Dirty Price = \sum_{i=1}^{k+1} CouponRate*DiscountFactor(t_i) + Principal*DiscountFactor(t_{k+1})$$
-    5. Solve the above formula for the **Discount Factor** at the k+1'th coupon issueing.
+    5. Solve the above formula for the **Discount Factor** at the k+1'th coupon issueing which is also the maturity date of the selected bond
+    
+# Other Documents:
+previous : - [Bond Pricing](bond_pricing.md) - Cash flows, Coupon conevntions, clean/dirty prices  
+next: - 
