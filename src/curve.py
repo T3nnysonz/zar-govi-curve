@@ -3,11 +3,14 @@ import numpy as np
 
 class DiscountCurve:
     def __init__(self, datapoints, interpolation="log_linear"):
-        # Convert to numpy arrays for easier math
+        datapoints = sorted(datapoints) # Sorts data by time since settlement date
+        # Convert to numpy arrays for easier maths
         pillars_t, pillars_df = zip(*datapoints)
         self.times = np.array(pillars_t, dtype=float)
         self.dfs = np.array(pillars_df, dtype=float)
         self.interpolation = interpolation
+        
+        self.validate();
         
     def interpolate(self, grain = 10):
         # datapoints: array of tuples, each tuple should be of form (float, float) and containts
@@ -21,24 +24,27 @@ class DiscountCurve:
     
     
         # Generates interpolated datapoints between inputted datapoints
-        new_pillars_t = []
-        log_df = np.log(self.dfs) # preparing for linearly interpolating between log of datapoints
-        new_pillars_df = []
-        for t in range(len(self.times)-1): # For every time pillar
-            interval_length = self.times[t+1]-self.times[t] # Find distance to next time pillar
-            df_difference = log_df[t+1]-log_df[t] # Calculate difference in DF values at the time pillars
-            for i in range(grain): # linearly adds datapoints between the pillars
-                new_pillars_t.append(self.times[t]+(i/grain)*interval_length)
-                new_pillars_df.append(log_df[t]+(i/grain)*df_difference)
-        new_pillars_t.append(self.times[-1])
-        new_pillars_df.append(np.log(self.dfs[-1]))
+        if(self.interpolation == "log_linear"):
+            new_pillars_t = []
+            log_df = np.log(self.dfs) # preparing for linearly interpolating between log of datapoints
+            new_pillars_df = []
+            for t in range(len(self.times)-1): # For every time pillar
+                interval_length = self.times[t+1]-self.times[t] # Find distance to next time pillar
+                df_difference = log_df[t+1]-log_df[t] # Calculate difference in DF values at the time pillars
+                for i in range(grain): # linearly adds datapoints between the pillars
+                    new_pillars_t.append(self.times[t]+(i/grain)*interval_length)
+                    new_pillars_df.append(log_df[t]+(i/grain)*df_difference)
+            new_pillars_t.append(self.times[-1])
+            new_pillars_df.append(np.log(self.dfs[-1]))
     
-        new_pillars_df = np.exp(new_pillars_df) #reverts the logarithmic data into standard data
-        new_data = zip(new_pillars_t, new_pillars_df) # recombines the time and DFs
+            new_pillars_df = np.exp(new_pillars_df) #reverts the logarithmic data into standard data
+            new_data = zip(new_pillars_t, new_pillars_df) # recombines the time and DFs
         
-        self.dfs = new_pillars_df
-        self.times = new_pillars_t
-        return new_data
+            return new_data
+        elif(self.interpolation == "linear"):
+            return zip(self.times, self.dfs)
+        else:
+            print("Unknown interpolation method, used linear interpolation instead.")
 
     def calcDF(self, t):
         # The idea behind this function is to find which 2 time pillars surround the t we are
@@ -90,3 +96,38 @@ class DiscountCurve:
         plt.grid()
         plt.show()
         return 0
+    
+    def validate(self):
+        valid = True
+        if(min(self.dfs <= 0)):
+            print("Warning: Discount Factors may not be less than or equal to zero.")
+            valid = False
+        if(min(self.times < 0)):
+            print("Warning: Pillar times may not be less than to zero.")
+            valid = False
+        if(self.times[0]!=0):
+            print("Warning: Expected initial time pillar to be t = 0, got: " +str(self.times[0]))
+            valid = False
+        elif(self.dfs[0]!=1):
+            print("Warning: Illogical data used. Discount factor should always equal 1 at t = 0.")
+            valid = False
+        for i in range(len(self.times)-1):
+            if self.dfs[i]<self.dfs[i+1]:
+                print("Warning, discount provided are not decreasing.")
+                valid = False
+                break;
+        
+        if(valid):
+            print("Valid curve, continue.")
+        else:
+            print("invalid curve")
+    
+    def update_data(self, datapoints, interpolation = "log_linear"):
+        datapoints = sorted(datapoints) # Sorts data by time since settlement date
+        # Convert to numpy arrays for easier maths
+        pillars_t, pillars_df = zip(*datapoints)
+        self.times = np.array(pillars_t, dtype=float)
+        self.dfs = np.array(pillars_df, dtype=float)
+        self.interpolation = interpolation
+        
+        self.validate();
