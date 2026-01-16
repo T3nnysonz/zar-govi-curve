@@ -1,4 +1,5 @@
 from datetime import date
+import numpy as np
 import pandas as pd
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -32,21 +33,35 @@ def price_from_curve(settle_date, cashflows, discount_curve, day_count = "ACT/36
         pv += amount*df
     return pv;
 
-def accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_value = 100, coupon_freq = 2):
-    
-    # Assumes that the value of the coupon is accrued linearly
-    
-    accrued_period = (settle_date-last_coupon).days # How long since last coupon issue.
-    full_accrue = (next_coupon-last_coupon).days # Full gap between coupons.
-    full_coupon = face_value * (coupon_rate/coupon_freq) # How much a full coupon payout would be.
-    fraction = accrued_period/full_accrue # What fraction of the current accruation period has been completed.
-    accrued_interest = full_coupon * fraction  # The correct fraction of the accruement of the full coupon.
-    
+def accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_value = 100, coupon_freq = 2, method = "linear"):
+    if(method == "linear"):
+        accrued_period = (settle_date-last_coupon).days # How long since last coupon issue.
+        full_accrue = (next_coupon-last_coupon).days # Full gap between coupons.
+        full_coupon = face_value * (coupon_rate/coupon_freq) # How much a full coupon payout would be.
+        fraction = accrued_period/full_accrue # What fraction of the current accruation period has been completed.
+        accrued_interest = full_coupon * fraction  # The correct fraction of the accruement of the full coupon.
+        
+    elif(method == "midpoint"):
+        accrued_interest = 0.5 * face_value * coupon_rate * 0.5
+        
+    elif(method == "none"):
+        accrued_interest = 0;
+        
+    elif(method == "log_linear"):
+        accrued_period = (settle_date-last_coupon).days # How long since last coupon issue.
+        full_accrue = (next_coupon-last_coupon).days # Full gap between coupons.
+        full_coupon = face_value * (coupon_rate/coupon_freq) # How much a full coupon payout would be.
+        ln_full_coupon = np.log(full_coupon)
+        fraction = accrued_period/full_accrue # What fraction of the current accruation period has been completed.
+        ln_accrued_interest = ln_full_coupon * fraction  # The correct fraction of the accruement of the full coupon.
+        accrued_interest = np.exp(ln_accrued_interest)
+        
+    else:
+        print("Unknown accruation method: did not accruate")
+        accrued_interest = 0;
+        
     return accrued_interest;
 
-def dirty_price(clean_price, settle_date, last_coupon, next_coupon, coupon_rate, face_value = 100, version = "normal"):
-    if version == "normal":
-        dirty_price = clean_price + accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_value)
-    else:
-        dirty_price = clean_price + 0.5 * face_value * coupon_rate * 0.5
+def dirty_price(clean_price, settle_date, last_coupon, next_coupon, coupon_rate, face_value = 100, coupon_freq = 2, method = "linear"):
+    dirty_price = clean_price + accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_value, coupon_freq, method)
     return dirty_price;

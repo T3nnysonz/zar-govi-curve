@@ -39,6 +39,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. cd tests
-
-5. python bootstrap_demo.py
+4. Run Demo:
+```
+cd tests
+python bootstrap_demo.py
+```

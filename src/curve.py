@@ -25,6 +25,7 @@ class DiscountCurve:
     
         # Generates interpolated datapoints between inputted datapoints
         if(self.interpolation == "log_linear"):
+            print("log")
             new_pillars_t = []
             log_df = np.log(self.dfs) # preparing for linearly interpolating between log of datapoints
             new_pillars_df = []
@@ -82,7 +83,7 @@ class DiscountCurve:
         df = np.exp(log_df)
         return df
 
-    def plot(self, interpolated = False):
+    def plot(self, interpolated = True):
         if(interpolated):
             datapoints = self.interpolate()
         else:
@@ -98,29 +99,19 @@ class DiscountCurve:
         return 0
     
     def validate(self):
-        valid = True
         if(min(self.dfs <= 0)):
-            print("Warning: Discount Factors may not be less than or equal to zero.")
-            valid = False
+            raise ValueError(f"Warning: Discount Factors may not be less than or equal to zero.")
         if(min(self.times < 0)):
-            print("Warning: Pillar times may not be less than to zero.")
-            valid = False
+            raise ValueError(f"Warning: Pillar times may not be less than to zero.")
         if(self.times[0]!=0):
-            print("Warning: Expected initial time pillar to be t = 0, got: " +str(self.times[0]))
-            valid = False
+            raise ValueError(f"Warning: Expected initial time pillar to be t = 0, got: +{self.times[0]}")
         elif(self.dfs[0]!=1):
-            print("Warning: Illogical data used. Discount factor should always equal 1 at t = 0.")
-            valid = False
+            raise ValueError(f"Warning: Illogical data used. Discount factor should always equal 1 at t = 0.")
         for i in range(len(self.times)-1):
             if self.dfs[i]<self.dfs[i+1]:
-                print("Warning, discount provided are not decreasing.")
-                valid = False
-                break;
+                raise ValueError(f"Warning, discount provided are not decreasing.")
         
-        if(valid):
-            print("Valid curve, continue.")
-        else:
-            print("invalid curve")
+        print("Valid curve, continue.")
     
     def update_data(self, datapoints, interpolation = "log_linear"):
         datapoints = sorted(datapoints) # Sorts data by time since settlement date

@@ -18,6 +18,7 @@ def bootstrap_govi_curve(bonds, settlement_date, conventions = None, type = "Yea
     day_count = conventions["day_count"] # Extracting convention data
     freq = conventions["coupon_frequency"]
     face_value = conventions["face_value"]
+    accrue_method = conventions["accrued_method"]
     
     for bond in sorted_bonds: # Go through the bonds from shortest to longest
         known = 0 # This parameter will contain the part of the dirty price that we know already
@@ -31,7 +32,7 @@ def bootstrap_govi_curve(bonds, settlement_date, conventions = None, type = "Yea
         next_coupon = (pd.Timestamp(previous_coupon) + pd.DateOffset(months=12//freq)).date()    
                  
         unknown_cashflows = [] # Where final cashflows of the bond being bootstrapped    
-        dirtyPrice = dirty_price(clean_price, settlement_date, previous_coupon, next_coupon, coupon_rate, face_value)
+        dirtyPrice = dirty_price(clean_price, settlement_date, previous_coupon, next_coupon, coupon_rate, face_value, coupon_freq=freq, method=accrue_method)
         # Above uses dirty price = clean price + accrued interest
         
         for date, flow in cashflows:           
@@ -47,10 +48,10 @@ def bootstrap_govi_curve(bonds, settlement_date, conventions = None, type = "Yea
             new_DF = (dirtyPrice-known)/final_payment # Solves for the desired Discount Factor
             DF_data.append((date1, new_DF)) # Appends data
             known_dfs.append((year_frac, new_DF))
-            df = DiscountCurve(known_dfs) # Updates Discount Curve
+            df.update_data(known_dfs) # Updates Discount Curve
         else:
             print("Unable to calculate df's") # Handles exceptions
-            return [];
+            return known_dfs;
     if type == "Year_Fractions":
         return known_dfs;
     elif type == "Dates":
