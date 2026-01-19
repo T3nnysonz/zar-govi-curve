@@ -45,11 +45,9 @@ def bootstrap_govi_curve(bonds, settlement_date, conventions = None, bounds = No
         if(len(unknown_cashflows)==1): # We can only work with 1 unknown which is what this checks for
             
             date1, final_payment = unknown_cashflows[0] # Extracts data from unknown cashflows
-            #print(final_payment)
-            #print(dirtyPrice)
-            #print(known)
+            yf_2 = year_fraction(settlement_date, date1, day_count)
             new_DF = (dirtyPrice-known)/final_payment # Solves for the desired Discount Factor
-            known_dfs.append((year_frac, new_DF))
+            known_dfs.append((yf_2, new_DF))
             df.update_data(known_dfs) # Updates Discount Curve
             dates.append(date1)
         else:

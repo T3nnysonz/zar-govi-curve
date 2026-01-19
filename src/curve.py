@@ -101,10 +101,10 @@ class DiscountCurve:
         rates = []
         times = []
         for time, df in datapoints:
-            times.append(time)
             if(time == 0):
-                rates.append(0)
+                continue
             else:
+                times.append(time)
                 rate = 1/np.power(df,1/time)-1
                 if rate < self.bounds['min_rate']:
                     raise ValueError(f"Warning: Rate {rate:.2%} at t={time:.2f} below minimum")
@@ -127,7 +127,7 @@ class DiscountCurve:
             raise ValueError(f"Warning: Illogical data used. Discount factor should always equal 1 at t = 0.")
         for i in range(len(self.times)-1):
             if self.dfs[i]<self.dfs[i+1]:
-                raise ValueError(f"Warning, discount provided are not decreasing.")
+                raise ValueError(f"Warning, discounts provided are not decreasing.")
     
     def update_data(self, datapoints, interpolation = "log_linear"):
         datapoints = sorted(datapoints) # Sorts data by time since settlement date
