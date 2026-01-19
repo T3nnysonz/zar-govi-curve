@@ -4,14 +4,7 @@ import numpy as np
 class DiscountCurve:
     def __init__(self, datapoints, interpolation="log_linear", bounds = None):
         
-        if bounds is None:
-            bounds = {
-                'min_rate': 0.0,     # Rates shouldn't be negative (usually)
-                'max_rate': 0.50,    # 50% maximum (adjust for hyperinflation markets)
-                'min_df': 0.001,      # Discount factors shouldn't be near zero
-                'max_df': 1.01,       # Discount factors may barely go above 1 for overnight market differences
-            }
-        self.bounds = bounds
+        self.bounds = self.getBounds(bounds)
         
         datapoints = sorted(datapoints) # Sorts data by time since settlement date
         # Convert to numpy arrays for easier maths
@@ -156,3 +149,13 @@ class DiscountCurve:
         self.interpolation = interpolation
         
         self.validate();
+    
+    def getBounds(self, bounds):
+        if bounds is None:
+            bounds = {
+                'min_rate': 0.0,     # Rates shouldn't be negative (usually)
+                'max_rate': 0.50,    # 50% maximum (adjust for hyperinflation markets)
+                'min_df': 0.001,      # Discount factors shouldn't be near zero
+                'max_df': 1.01,       # Discount factors may barely go above 1 for overnight market differences
+            }
+        self.bounds = bounds

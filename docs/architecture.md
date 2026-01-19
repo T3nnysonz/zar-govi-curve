@@ -1,0 +1,1 @@
+![Mermaid Diagram of webApp workflow](Mermaid_diagram.png "Bootstrapping Mermaid Diagram")

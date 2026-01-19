@@ -11,7 +11,9 @@ def bootstrap_govi_curve(bonds, settlement_date, conventions = None, type = "Yea
     DF_data = [(settlement_date, 1)] # DF_data and known_dfs are very similar with the only difference
     known_dfs = [(0,1)] # Being that known_dfs holds year fractions while DF_data holds dates
     
-    conventions = getConventions(conventions); # Method built at the bottom of this file
+    print(conventions)
+    return 0;
+    #conventions = getConventions(conventions); # Method built at the bottom of this file
     
     day_count = conventions["day_count"] # Extracting convention data
     freq = conventions["coupon_frequency"]
@@ -19,7 +21,7 @@ def bootstrap_govi_curve(bonds, settlement_date, conventions = None, type = "Yea
     accrue_method = conventions["accrued_method"]
     interpolation_method = conventions["interpolation_method"]
     
-    df = DiscountCurve(known_dfs, bounds=bounds, interpolation=interpolation_method)
+    df = DiscountCurve(known_dfs, interpolation=interpolation_method, bounds=bounds)
     
     for bond in sorted_bonds: # Go through the bonds from shortest to longest
         known = 0 # This parameter will contain the part of the dirty price that we know already
