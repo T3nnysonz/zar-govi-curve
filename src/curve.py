@@ -49,8 +49,7 @@ class DiscountCurve:
     
             new_pillars_df = np.exp(new_pillars_df) #reverts the logarithmic data into standard data
             new_data = zip(new_pillars_t, new_pillars_df) # recombines the time and DFs
-        
-            print(new_data)
+            
             return new_data
         elif(self.interpolation == "linear"):
             return zip(self.times, self.dfs)
@@ -106,8 +105,7 @@ class DiscountCurve:
         plt.ylabel('Discount Factor')
         plt.title('Discount Factor Curve')
         plt.grid()
-        plt.show()
-        return 0
+        return plt
     
     def plot_zero_rates(self, interpolation = "log_linear"):
         datapoints = self.interpolate()
