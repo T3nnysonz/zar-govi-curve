@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import date
+import numpy as np
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.bootstrap import bootstrap_govi_curve
@@ -69,30 +70,35 @@ bnds = {
 st.header("Settlement Date")
 settlement_date = st.date_input("")#
 
-dfs = bootstrap_govi_curve(bonds, settlement_date, conventions = convs, bounds = bnds)#
+dfs_data, dates = bootstrap_govi_curve(bonds, settlement_date, conventions = convs, bounds = bnds)
+dfs_curve = DiscountCurve(dfs_data, interpolation=convs["interpolation_method"], bounds=bnds)
 
-dummyX = [0,face_val]
-dummyY = [1,0]
+x,y = dfs_curve.plot()
+x1, y1 = dfs_curve.plot_zero_rates()
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4)) #
 fig.set_figwidth(10)
 fig.set_figheight(3)
 
 # Plot data on the first subplot (ax1)
-ax1.plot(dummyX, dummyY)
+ax1.plot(x, y)
 ax1.set_title('Discount Factors')
 ax1.set_ylabel('Discount Factor')
 ax1.set_xlabel('Time since settlement date')
 ax1.grid(True)
 
-dummyX = [0,1]
-dummyY = [0.08,0.092]
-
 # Plot data on the second subplot (ax2)
-ax2.plot(dummyX, dummyY, 'r-') # 'r-' for a red line
+ax2.plot(x1, y1, 'r-') # 'r-' for a red line
 ax2.set_title('Zero Rates')
 ax2.set_ylabel('Zero Rate')
 ax2.set_xlabel('Time since settlement date')
 ax2.grid(True)
 
 st.pyplot(fig=fig)
+
+# Table
+
+year_fracs, rates = dfs_curve.plot_zero_rates(False)
+year_fracs, dfs = zip(*dfs_data)
+frame = pd.DataFrame({"Date:":dates,"Time in years since settlement:":year_fracs,"Discount Factor:":dfs,"Zero Rates:":rates})
+st.write(frame)

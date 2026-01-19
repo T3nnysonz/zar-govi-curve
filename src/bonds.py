@@ -1,4 +1,3 @@
-from datetime import date
 import numpy as np
 import pandas as pd
 import sys, os
@@ -21,7 +20,6 @@ def generate_cashflows(settle_date, mature_date, coupon_rate, coupon_freq = 2, f
             coupon_payment = round(face_value*(coupon_rate/coupon_freq), 5)
             cashflows.append((working_date, coupon_payment))
             working_date = (pd.Timestamp(working_date) - pd.DateOffset(months=(12//coupon_freq))).date()
-    
     
         return sorted(cashflows);
 

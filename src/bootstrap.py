@@ -4,16 +4,13 @@ import pandas as pd
 from src.daycount import year_fraction
 from src.curve import DiscountCurve
 
-def bootstrap_govi_curve(bonds, settlement_date, conventions = None, type = "Year_Fractions", bounds = None):
+def bootstrap_govi_curve(bonds, settlement_date, conventions = None, bounds = None):
     
     sorted_bonds = sorted(bonds, key= lambda b: b['mature_date']) ## Sorts bonds by maturity date
     
-    DF_data = [(settlement_date, 1)] # DF_data and known_dfs are very similar with the only difference
-    known_dfs = [(0,1)] # Being that known_dfs holds year fractions while DF_data holds dates
-    
-    print(conventions)
-    return 0;
-    #conventions = getConventions(conventions); # Method built at the bottom of this file
+    known_dfs = [(0,1)] # Being that known_dfs holds year fractions
+    dates = [settlement_date]
+    conventions = getConventions(conventions); # Method built at the bottom of this file
     
     day_count = conventions["day_count"] # Extracting convention data
     freq = conventions["coupon_frequency"]
@@ -48,23 +45,19 @@ def bootstrap_govi_curve(bonds, settlement_date, conventions = None, type = "Yea
         if(len(unknown_cashflows)==1): # We can only work with 1 unknown which is what this checks for
             
             date1, final_payment = unknown_cashflows[0] # Extracts data from unknown cashflows
+            #print(final_payment)
+            #print(dirtyPrice)
+            #print(known)
             new_DF = (dirtyPrice-known)/final_payment # Solves for the desired Discount Factor
-            DF_data.append((date1, new_DF)) # Appends data
             known_dfs.append((year_frac, new_DF))
             df.update_data(known_dfs) # Updates Discount Curve
+            dates.append(date1)
         else:
             print("Unable to calculate df's") # Handles exceptions
-            return known_dfs;
-    if type == "Year_Fractions":
-        return known_dfs;
-    elif type == "Dates":
-        return DF_data;
-    else:
-        print("Unregistered type; year fractions returned instead")
-        return known_dfs;
+    return known_dfs, dates;
 
 def getConventions(conventions):
-    if conventions is None:
+    if(conventions is None):
         conventions = {
             'day_count': 'ACT/365F',
             'coupon_frequency': 2,
@@ -72,4 +65,4 @@ def getConventions(conventions):
             'face_value': 100,
             'accrued_method': 'linear'
         }
-        return conventions
+    return conventions

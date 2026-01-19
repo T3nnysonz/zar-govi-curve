@@ -1,9 +1,8 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
 class DiscountCurve:
     def __init__(self, datapoints, interpolation="log_linear", bounds = None):
-        
+
         self.bounds = self.getBounds(bounds)
         
         datapoints = sorted(datapoints) # Sorts data by time since settlement date
@@ -24,7 +23,6 @@ class DiscountCurve:
         grain = np.floor(grain)
         if grain<1:
             grain = 1
-    
     
         # Generates interpolated datapoints between inputted datapoints
         if(self.interpolation == "log_linear"):
@@ -89,19 +87,16 @@ class DiscountCurve:
     def plot(self, interpolated = True):
         if(interpolated):
             datapoints = self.interpolate()
+            times, dfs = zip(*datapoints)
+            return times, dfs
+        else:
+            return self.times, self.dfs
+    
+    def plot_zero_rates(self, Interpolated = True):
+        if(Interpolated):
+            datapoints = self.interpolate()
         else:
             datapoints = zip(self.times, self.dfs)
-        
-        times, dfs = zip(*datapoints)
-        plt.plot(times, dfs)
-        plt.xlabel('Time (years)')
-        plt.ylabel('Discount Factor')
-        plt.title('Discount Factor Curve')
-        plt.grid()
-        return plt
-    
-    def plot_zero_rates(self, interpolation = "log_linear"):
-        datapoints = self.interpolate()
         
         rates = []
         times = []
@@ -116,13 +111,7 @@ class DiscountCurve:
                 if rate > self.bounds['max_rate']:
                     raise ValueError(f"Warning: Rate {rate:.2%} at t={time:.2f} above maximum")
                 rates.append(rate)
-        plt.plot(times, rates)
-        plt.xlabel('Time (years)')
-        plt.ylabel('Zero Rate')
-        plt.title('Zero Rate Curve')
-        plt.grid()
-        plt.show()
-        return 0
+        return times, rates
     
     def validate(self):
             
@@ -158,4 +147,4 @@ class DiscountCurve:
                 'min_df': 0.001,      # Discount factors shouldn't be near zero
                 'max_df': 1.01,       # Discount factors may barely go above 1 for overnight market differences
             }
-        self.bounds = bounds
+        return bounds
