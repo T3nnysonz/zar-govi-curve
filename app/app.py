@@ -1,6 +1,5 @@
 import streamlit as st
 from datetime import date
-import numpy as np
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.bootstrap import bootstrap_govi_curve
@@ -8,6 +7,7 @@ from src.curve import DiscountCurve
 import matplotlib.pyplot as plt
 import pandas as pd
 import io
+import src.conventions
 
 st.set_page_config(layout="wide")
 st.title("ZAR Government Bootstrapper")
@@ -15,7 +15,7 @@ data = ""
 
 try:
     url = st.text_input("Enter url for csv containing bond data:","data/testbonds.csv")
-    data = pd.read_csv(url, delimiter=";")
+    data = pd.read_csv(url, delimiter=",")
 except:
     st.write("Unknown file: File by that name could not be found. Remember to add .csv to the end of your file name")
 
@@ -23,6 +23,8 @@ st.header("Raw data")
 
 bonds = []
 st.write(data)
+
+earliest = date(2099, 12, 31)
 
 #
 # Logic for computing dfs.
@@ -39,13 +41,11 @@ for row in range(len(data)):
     
     mature_date = date(year,month,day)
     
-    bond = {
-        "mature_date":mature_date,
-        "coupon_rate":coupon_rate,
-        "clean_price":clean_price
-    }
+    if(mature_date<earliest):
+        earliest = mature_date
+    
+    bond = src.conventions.getBond(mature_date, coupon_rate, clean_price)
     bonds.append(bond)
-
 
 st.header("Conventions")
 day_count = st.selectbox("Day Count Convention: (ZAR Government Bonds default to ACT/365F)",
@@ -55,13 +55,7 @@ accruation = st.selectbox("Dirty Price interest accumulation method:", ["linear"
 face_val = st.number_input("Face value (treated as universal)",min_value=90.0,max_value=110.0, value=100.0)
 coupon_freq = st.number_input("Coupon issueing rate: (Issues per year)",min_value=1,max_value=12, value = 2)
 
-convs = {
-    'day_count': day_count,
-    'coupon_frequency': coupon_freq,
-    'interpolation_method': interpolation,
-    'face_value': face_val,
-    'accrued_method': accruation
-}
+convs = src.conventions.getConventions(day_count, coupon_freq, interpolation, face_val, accruation)
 
 st.header("Bounds")
 df_upp = st.number_input("Maximum accepted discount factor", max_value=1.01, min_value=0.01, value = 1.0)
@@ -69,20 +63,13 @@ df_low = st.number_input("Minimum accepted discount factor", max_value= df_upp, 
 rates_upp = st.number_input("Maximum accepted zero rate", max_value=0.5, min_value=0.0, value = 0.25)
 rates_low = st.number_input("Minimum accepted zero rate", max_value=rates_upp, min_value=0.0)
 
-bnds = {
-    'min_rate': rates_low,     # Rates shouldn't be negative (usually)
-    'max_rate': rates_upp,    # 50% maximum (adjust for hyperinflation markets)
-    'min_df': df_low,      # Discount factors shouldn't be near zero
-    'max_df': df_upp,       # Discount factors may barely go above 1 for overnight market differences
-}
+bnds = src.conventions.getBounds(rates_low, rates_upp, df_low, df_upp)
 
 st.header("Settlement Date")
-settlement_date = st.date_input("")#
+settlement_date = st.date_input("Enter the settlement date of the bonds", max_value=earliest)
 
 dfs_data, dates = bootstrap_govi_curve(bonds, settlement_date, conventions = convs, bounds = bnds)
 dfs_curve = DiscountCurve(dfs_data, interpolation=convs["interpolation_method"], bounds=bnds)
-
-#
 
 x,y = dfs_curve.plot()
 x1, y1 = dfs_curve.plot_zero_rates()
@@ -129,5 +116,3 @@ btn = st.download_button(
    file_name=fn,
    mime="image/png"
 )
-#st.download_button("Download Discount Factor Plot")
-#st.download_button("Download Zero Rates Plot")

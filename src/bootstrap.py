@@ -1,5 +1,6 @@
 from src.bonds import generate_cashflows
 from src.bonds import dirty_price
+from src.bonds import price_from_curve
 import pandas as pd
 from src.daycount import year_fraction
 from src.curve import DiscountCurve
@@ -21,7 +22,6 @@ def bootstrap_govi_curve(bonds, settlement_date, conventions = None, bounds = No
     df = DiscountCurve(known_dfs, interpolation=interpolation_method, bounds=bounds)
     
     for bond in sorted_bonds: # Go through the bonds from shortest to longest
-        known = 0 # This parameter will contain the part of the dirty price that we know already
         mature_date = bond["mature_date"] # Extracting bond data
         coupon_rate = bond["coupon_rate"]
         clean_price = bond["clean_price"]
@@ -30,10 +30,11 @@ def bootstrap_govi_curve(bonds, settlement_date, conventions = None, bounds = No
         while(previous_coupon>settlement_date): # Loop moves back in time at regular intervals until previous coupon falls before sttlement date
             previous_coupon = (pd.Timestamp(previous_coupon) - pd.DateOffset(months=12//freq)).date()
         next_coupon = (pd.Timestamp(previous_coupon) + pd.DateOffset(months=12//freq)).date()    
-                 
+        known = 0
         unknown_cashflows = [] # Where final cashflows of the bond being bootstrapped    
         dirtyPrice = dirty_price(clean_price, settlement_date, previous_coupon, next_coupon, coupon_rate, face_value, coupon_freq=freq, method=accrue_method)
-        # Above uses dirty price = clean price + accrued interest
+        # Above uses dirty price = clean price + accrued interest    
+        #known = price_from_curve(settlement_date, cashflows, df, day_count)
         
         for date, flow in cashflows:           
             year_frac = year_fraction(settlement_date, date, day_count) # How long has passed since settlement date
@@ -45,9 +46,8 @@ def bootstrap_govi_curve(bonds, settlement_date, conventions = None, bounds = No
         if(len(unknown_cashflows)==1): # We can only work with 1 unknown which is what this checks for
             
             date1, final_payment = unknown_cashflows[0] # Extracts data from unknown cashflows
-            yf_2 = year_fraction(settlement_date, date1, day_count)
             new_DF = (dirtyPrice-known)/final_payment # Solves for the desired Discount Factor
-            known_dfs.append((yf_2, new_DF))
+            known_dfs.append((year_frac, new_DF))
             df.update_data(known_dfs) # Updates Discount Curve
             dates.append(date1)
         else:

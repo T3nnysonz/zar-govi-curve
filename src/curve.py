@@ -3,12 +3,11 @@ import numpy as np
 class DiscountCurve:
     def __init__(self, datapoints, interpolation="log_linear", bounds = None):
 
-        self.bounds = self.getBounds(bounds)
+        self.bounds = bounds
         
         datapoints = sorted(datapoints) # Sorts data by time since settlement date
-        # Convert to numpy arrays for easier maths
         pillars_t, pillars_df = zip(*datapoints)
-        self.times = np.array(pillars_t, dtype=float)
+        self.times = np.array(pillars_t, dtype=float) # Convert to numpy arrays for easier maths
         self.dfs = np.array(pillars_df, dtype=float)
         self.interpolation = interpolation
         
@@ -127,7 +126,7 @@ class DiscountCurve:
             raise ValueError(f"Warning: Illogical data used. Discount factor should always equal 1 at t = 0.")
         for i in range(len(self.times)-1):
             if self.dfs[i]<self.dfs[i+1]:
-                raise ValueError(f"Warning, discounts provided are not decreasing.")
+                raise ValueError(f"Warning, discounts provided are increasing.")
     
     def update_data(self, datapoints, interpolation = "log_linear"):
         datapoints = sorted(datapoints) # Sorts data by time since settlement date
@@ -139,12 +138,12 @@ class DiscountCurve:
         
         self.validate();
     
-    def getBounds(self, bounds):
-        if bounds is None:
-            bounds = {
-                'min_rate': 0.0,     # Rates shouldn't be negative (usually)
-                'max_rate': 0.50,    # 50% maximum (adjust for hyperinflation markets)
-                'min_df': 0.001,      # Discount factors shouldn't be near zero
-                'max_df': 1.01,       # Discount factors may barely go above 1 for overnight market differences
-            }
-        return bounds
+#    def getBounds(bounds):
+#        if bounds is None:
+#            bounds = {
+#                'min_rate': 0.0,     # Rates shouldn't be negative (usually)
+#                'max_rate': 0.50,    # 50% maximum (adjust for hyperinflation markets)
+#                'min_df': 0.001,      # Discount factors shouldn't be near zero
+#                'max_df': 1.01,       # Discount factors may barely go above 1 for overnight market differences
+#            }
+#        return bounds

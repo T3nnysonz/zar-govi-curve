@@ -1,5 +1,4 @@
 import numpy
-import datetime
 
 def df_from_rate(rate, t, compounding = True):
     '''
@@ -16,6 +15,13 @@ def df_from_rate(rate, t, compounding = True):
     return df
 
 def year_fraction(start_date, end_date, day_count="ACT/365F"):
+    '''
+    Description: returns amount of time between the start and end date as a float number of years
+    
+    start_date: Start date in standard datetime.date() format
+    end_date: End date in standard datetime.date() format
+    day_count: Convention used for measuring year length and duration between 2 dates
+    '''
 
     if day_count == "ACT/365F":
         # Computes the decimal amount of 365 day years between 2 dates
