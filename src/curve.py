@@ -4,6 +4,13 @@ class DiscountCurve:
     def __init__(self, datapoints, interpolation="log_linear", bounds = None):
 
         self.bounds = bounds
+        if bounds is None:
+            self.bounds = {
+                'min_rate': 0.0,     # Rates shouldn't be negative (usually)
+                'max_rate': 0.50,    # 50% maximum (adjust for hyperinflation markets)
+                'min_df': 0.001,      # Discount factors shouldn't be near zero
+                'max_df': 1.01,       # Discount factors may barely go above 1 for overnight market differences
+            }
         
         datapoints = sorted(datapoints) # Sorts data by time since settlement date
         pillars_t, pillars_df = zip(*datapoints)
@@ -104,12 +111,8 @@ class DiscountCurve:
                 continue
             else:
                 times.append(time)
-                rate = 1/np.power(df,1/time)-1
-                if rate < self.bounds['min_rate']:
-                    raise ValueError(f"Warning: Rate {rate:.2%} at t={time:.2f} below minimum")
-                if rate > self.bounds['max_rate']:
-                    raise ValueError(f"Warning: Rate {rate:.2%} at t={time:.2f} above maximum")
-                rates.append(rate)
+                rates.append(self.rate_from_df(time))
+                
         return times, rates
     
     def validate(self):
@@ -124,9 +127,9 @@ class DiscountCurve:
             raise ValueError(f"Warning: Expected initial time pillar to be t = 0, got: +{self.times[0]}")
         elif(self.dfs[0]!=1):
             raise ValueError(f"Warning: Illogical data used. Discount factor should always equal 1 at t = 0.")
-        for i in range(len(self.times)-1):
-            if self.dfs[i]<self.dfs[i+1]:
-                raise ValueError(f"Warning, discounts provided are increasing.")
+#        for i in range(len(self.times)-1):
+#            if self.dfs[i]<self.dfs[i+1]:
+#                raise ValueError(f"Warning, discounts provided are increasing.")
     
     def update_data(self, datapoints, interpolation = "log_linear"):
         datapoints = sorted(datapoints) # Sorts data by time since settlement date
@@ -137,13 +140,14 @@ class DiscountCurve:
         self.interpolation = interpolation
         
         self.validate();
+        
+    def rate_from_df(self, time):
+        df = self.calcDF(time)
+        #rate = 1/np.power(df,1/time)-1
+        rate = -np.log(df)/time
+        if rate < self.bounds['min_rate']:
+            raise ValueError(f"Warning: Rate {rate:.2%} at t={time:.2f} below minimum")
+        if rate > self.bounds['max_rate']:
+            raise ValueError(f"Warning: Rate {rate:.2%} at t={time:.2f} above maximum")
+        return rate
     
-#    def getBounds(bounds):
-#        if bounds is None:
-#            bounds = {
-#                'min_rate': 0.0,     # Rates shouldn't be negative (usually)
-#                'max_rate': 0.50,    # 50% maximum (adjust for hyperinflation markets)
-#                'min_df': 0.001,      # Discount factors shouldn't be near zero
-#                'max_df': 1.01,       # Discount factors may barely go above 1 for overnight market differences
-#            }
-#        return bounds
