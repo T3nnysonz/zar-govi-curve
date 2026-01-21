@@ -47,5 +47,4 @@ $ DF = e^{-r\times t}$
 As continuous compounding is the compounding method used in actual finance, the exponential formula is the most appropriate for financial settings.
 
 # Other Documents:
-previous : -
 next: - [Curve Concepts](curve_concepts.md) - Zero curves, Par yield curves, Discount Factor Curves, Interpolation methods.

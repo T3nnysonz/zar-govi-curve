@@ -4,6 +4,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.bootstrap import bootstrap_govi_curve
 from src.curve import DiscountCurve
 from src.daycount import year_fraction
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -34,9 +35,6 @@ def test_zero_coupon_bond():
     actual_df = disCurve.calcDF(1.0)  # 1 year
     
     print(f"expected: {expected_df} actual: {actual_df}, absoulute error: {abs(expected_df-actual_df)}")
-    
-    # Use assertAlmostEqual for floating point comparison
-    #assert abs(actual_df - expected_df) < 1e-10
 
 def test_two_par_bonds_flat_curve():
     """Two bonds at par should give flat zero curve"""
@@ -160,7 +158,14 @@ def test_sample_dataset_regression():
     plt.legend()
     plt.grid()
     plt.show()
-
+    
+    act_dfs = np.array(act_dfs)
+    exp_dfs = np.array(exp_dfs)
+    act_rates = np.array(act_rates)
+    exp_rates = np.array(exp_rates)
+    print(abs(act_dfs-exp_dfs)/exp_dfs)
+    print("---------------")
+    print(abs(act_rates-exp_rates)/exp_rates)
 choice1 = input("Test bootstrapping for zero coupon bond? Enter [y/n]")
 if(choice1 == 'y'):
     test_zero_coupon_bond()
