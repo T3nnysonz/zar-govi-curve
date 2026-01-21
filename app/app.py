@@ -15,7 +15,7 @@ data = ""
 
 try:
     url = st.text_input("Enter url for csv containing bond data:","data/testbonds.csv")
-    data = pd.read_csv(url, delimiter=";")
+    data = pd.read_csv(url, delimiter=",")
 except:
     st.write("Unknown file: File by that name could not be found. Remember to add .csv to the end of your file name")
 

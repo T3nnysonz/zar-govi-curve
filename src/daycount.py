@@ -1,19 +1,5 @@
 import numpy
 
-def df_from_rate(rate, t, compounding = True):
-    '''
-    Description: returns the Discount Factor of a bond given the interest rate and investment period
-    
-    rate: float, the interest rate of the bond
-    t: integer, the number of compounding periods the bond experiences
-    compounding: boolean, True if the interest on the bond is compounding and otherwise false
-    '''
-    if(compounding):
-        df = round(1/(1+rate)**t, 5)
-    else:
-        df = round(1/(1+rate*t), 5)
-    return df
-
 def year_fraction(start_date, end_date, day_count="ACT/365F"):
     '''
     Description: returns amount of time between the start and end date as a float number of years

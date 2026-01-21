@@ -4,40 +4,39 @@ from src.curve import DiscountCurve
 
 from datetime import date
 from src.bonds import generate_cashflows
-from src.bonds import price_from_curve
 
-disCurve1 = DiscountCurve([(0,1),(1,0.75),(2,0.5),(3,0.25)])
+def test():
+    issue_year = int(input("issue year:\n"))
+    issue_month = int(input("issue month:\n"))
+    issue_day = int(input("issue day:\n"))
+    issueing = date(issue_year, issue_month, issue_day)
+    mature_year = int(input("maturity year:\n"))
+    mature_month = int(input("maturity month:\n"))
+    mature_day = int(input("maturity day:\n"))
+    maturing = date(mature_year, mature_month, mature_day)
+    coupon_rate = float(input(f"Coupon rate: Enter as a float, e.g. for 5% rate enter 0.05" + "\n"))
+    coupon_freq = int(input("Coupon frequency: number of coupons issued per year: \n"))
 
-print("Test: bond purchased between coupon payments")
-issueing = date(2024, 7, 15)
-maturing = date(2025, 12, 15)
-cash1 = generate_cashflows(issueing, maturing, 0.05, 2)
-print(cash1)
-print(price_from_curve(issueing, cash1, disCurve1))
+    if(maturing<issueing):
+        print("Illogical input. A bond cannot mature before it's settlement date")
+        choice = input("rerun test? enter [y/n]")
+        if(choice == 'y'):
+            test()
+        elif(choice == 'n'):
+            pass
+        else:
+            print("unregistered input")
+            pass
+    else:
+        cash = generate_cashflows(issueing, maturing, coupon_rate, coupon_freq)
+        print(cash)
+        choice = input("rerun test? enter [y/n]")
+        if(choice == 'y'):
+            test()
+        elif(choice == 'n'):
+            pass
+        else:
+            print("unregistered input")
+            pass
 
-print("Test: zero-coupon bond")
-issueing = date(2024, 6, 15)
-maturing = date(2025, 12, 15)
-cash2 = generate_cashflows(issueing, maturing, 0, 2)
-print(cash2)
-print(price_from_curve(issueing, cash2, disCurve1))
-
-### Different discount curve
-
-disCurve2 = DiscountCurve([(0,1),(1,0.7),(2,0.49),(3,0.343), (4,0.2401)])
-#disCurve2.interpolate()
-#disCurve2.plot()
-
-print("Test: bond purchased between coupon payments")
-issueing = date(2024, 7, 15)
-maturing = date(2025, 12, 15)
-cash3 = generate_cashflows(issueing, maturing, 0.05, 2)
-print(cash3)
-print(price_from_curve(issueing, cash3, disCurve2))
-
-print("Test: zero-coupon bond")
-issueing = date(2024, 6, 15)
-maturing = date(2025, 12, 15)
-cash4 = generate_cashflows(issueing, maturing, 0, 2)
-print(cash4)
-print(price_from_curve(issueing, cash4, disCurve2))
+test()

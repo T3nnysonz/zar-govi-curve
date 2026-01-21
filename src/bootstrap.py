@@ -1,6 +1,5 @@
 from src.bonds import generate_cashflows
 from src.bonds import dirty_price
-from src.bonds import price_from_curve
 import pandas as pd
 from src.daycount import year_fraction
 from src.curve import DiscountCurve
@@ -34,7 +33,6 @@ def bootstrap_govi_curve(bonds, settlement_date, conventions = None, bounds = No
         unknown_cashflows = [] # Where final cashflows of the bond being bootstrapped    
         dirtyPrice = dirty_price(clean_price, settlement_date, previous_coupon, next_coupon, coupon_rate, face_value, coupon_freq=freq, method=accrue_method)
         # Above uses dirty price = clean price + accrued interest    
-        #known = price_from_curve(settlement_date, cashflows, df, day_count)
         
         for date, flow in cashflows:           
             year_frac = year_fraction(settlement_date, date, day_count) # How long has passed since settlement date

@@ -5,8 +5,7 @@ from src.bootstrap import bootstrap_govi_curve
 from src.curve import DiscountCurve
 from src.daycount import year_fraction
 import pandas as pd
-import numpy as np
-from pathlib import Path
+import matplotlib.pyplot as plt
 
 def test_zero_coupon_bond():
     """Zero coupon bonds should bootstrap directly from price"""
@@ -74,12 +73,6 @@ def test_two_par_bonds_flat_curve():
     # Should be close to 5% (allow for compounding differences)
     print(f"zero-rate after 1 year:{zero1} Expected: 0.05, absolute difference: {abs(zero1 - 0.05)}")
     print(f"zero-rate after 2 years:{zero2} Expected: 0.05, absolute difference: {abs(zero2 - 0.05)}")
-    
-def test_known_cashflow_sequence():
-    """Test with bonds where we can manually verify"""
-    # This is a more complex example where you'd
-    # pre-calculate the expected DFs
-    pass
 
 #test_zero_coupon_bond()
 #test_two_par_bonds_flat_curve()
@@ -126,21 +119,68 @@ def test_sample_dataset_regression():
     disc_curve = DiscountCurve(discount_factors, conventions["interpolation_method"])
     
     # Compare at key points
-    print("Murex comparison")
+    time_points = []
+    exp_dfs = []
+    exp_rates = []
+    act_dfs = []
+    act_rates = []
     for row in range(len(expected_df)):
         day = (expected_df['day'][row])
         month = (expected_df['month'][row])
         year = (expected_df['year'][row])
         dsFact = (expected_df['dsFactor'][row])
-        dsRate = (expected_df['dsRate'][row])
+        dsRate = (expected_df['dsRate'][row])   
+        
+        exp_dfs.append(dsFact)
+        exp_rates.append(dsRate)
     
         mature_date = date(year,month,day)
+        time_point = year_fraction(settlement, mature_date, conventions['day_count'])
+        time_points.append(time_point)
         
-        actual_df = disc_curve.calcDF(year_fraction(settlement, mature_date, conventions['day_count']))
-        actual_zero = disc_curve.rate_from_df(year_fraction(settlement, mature_date, conventions['day_count']))
+        actual_df = disc_curve.calcDF(time_point)
+        actual_zero = disc_curve.rate_from_df(time_point)
+        act_dfs.append(actual_df)
+        act_rates.append(actual_zero)
 
-        print(date)
-        print(f"Expected Discount Factor:{dsFact}, got: {actual_df}")
-        print(f"Expected Zero rate:{dsRate}, got: {actual_zero}")
+    plt.plot(time_points, act_dfs, label = "Mine")
+    plt.plot(time_points, exp_dfs, label = "Murex")
+    plt.title("Discount factor comparison")
+    plt.xlabel("Time in years since settlement")
+    plt.ylabel("Discount factor")
+    plt.legend()
+    plt.grid()
+    plt.show()
+    
+    plt.plot(time_points, act_rates, label = "Mine")
+    plt.plot(time_points, exp_rates, label = "Murex")
+    plt.title("Zero rate comparison")
+    plt.xlabel("Time in years since settlement")
+    plt.ylabel("Zero rate")
+    plt.legend()
+    plt.grid()
+    plt.show()
 
-test_sample_dataset_regression()
+choice1 = input("Test bootstrapping for zero coupon bond? Enter [y/n]")
+if(choice1 == 'y'):
+    test_zero_coupon_bond()
+elif(choice1 == 'n'):
+    pass
+else:
+    print("Unrecognised input, enter either 'y' for yes or 'n' for no")
+
+choice2 = input("Test bootstrapping for two par bonds? Enter [y/n]")
+if(choice2 == 'y'):
+    test_two_par_bonds_flat_curve()
+elif(choice2 == 'n'):
+    pass
+else:
+    print("Unrecognised input, enter either 'y' for yes or 'n' for no")
+
+choice3 = input("Test bootstrapping for sample murex data? Enter [y/n]")
+if(choice3 == 'y'):
+    test_sample_dataset_regression()
+elif(choice3 == 'n'):
+    pass
+else:
+    print("Unrecognised input, enter either 'y' for yes or 'n' for no")

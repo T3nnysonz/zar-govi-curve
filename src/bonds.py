@@ -10,6 +10,8 @@ def generate_cashflows(settle_date, mature_date, coupon_rate, coupon_freq = 2, f
     if(coupon_rate == 0):
         cashflows.append((mature_date, face_value))
         return cashflows;
+    elif(settle_date == mature_date):
+        return cashflows;
     else:
     
         working_date = mature_date
@@ -22,14 +24,6 @@ def generate_cashflows(settle_date, mature_date, coupon_rate, coupon_freq = 2, f
             working_date = (pd.Timestamp(working_date) - pd.DateOffset(months=(12//coupon_freq))).date()
     
         return sorted(cashflows);
-
-def price_from_curve(settle_date, cashflows, discount_curve, day_count = "ACT/365F"):
-    pv = 0
-    for date, amount in cashflows:
-        time = year_fraction(settle_date, date, day_count)
-        df = discount_curve.calcDF(time)
-        pv += amount*df
-    return pv;
 
 def accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_value = 100, coupon_freq = 2, method = "linear"):
     if(method == "linear"):
