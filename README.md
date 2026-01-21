@@ -4,7 +4,9 @@ A web application for bootstrapping zero curves from South African government bo
 
 ## Project Overview
 
-- 
+This project provides the ability to run a local website for the bootstrapping of goverment bonds. The primary features include:
+- The Webapp itself which allows the user to run bootstrapping on government bonds imported from a csv file, using customizable settlement dates, conventions, and bounds. The Webapp also visualises the bootstrapping results in the form of graphs and tables which each may be downloaded directly from the website.
+- A testing suite which allows for users to test basic functionality of the primary functions and objects involved in the overall bootstrapping process. It also allows for a test of sample data against Murex results as a validity indicator of the bootstrapper.
 
 ## Setup
 

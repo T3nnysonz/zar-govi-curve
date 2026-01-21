@@ -72,9 +72,6 @@ def test_two_par_bonds_flat_curve():
     print(f"zero-rate after 1 year:{zero1} Expected: 0.05, absolute difference: {abs(zero1 - 0.05)}")
     print(f"zero-rate after 2 years:{zero2} Expected: 0.05, absolute difference: {abs(zero2 - 0.05)}")
 
-#test_zero_coupon_bond()
-#test_two_par_bonds_flat_curve()
-
 def test_sample_dataset_regression():
     """Test that bootstrap produces same results as saved reference"""
     bonds = []
@@ -88,7 +85,7 @@ def test_sample_dataset_regression():
     
     # Load sample dataset
     url = "data/real_data.csv"
-    data = pd.read_csv(url, delimiter=";")
+    data = pd.read_csv(url, delimiter=",")
     
     # Convert to list of dicts
     for row in range(len(data)):
@@ -109,7 +106,7 @@ def test_sample_dataset_regression():
     
     # Load expected results (saved from a known-good run)
     expected_path = "data/expected_output.csv" # Some approximations were made when copying the murex data
-    expected_df = pd.read_csv(expected_path, delimiter=";")
+    expected_df = pd.read_csv(expected_path, delimiter=",")
     
     # Run bootstrap
     settlement = date(2025,10,2)  # All bonds should have same settlement
