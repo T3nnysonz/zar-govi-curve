@@ -52,25 +52,25 @@ for row in range(len(data)):
     bond = src.conventions.getBond(mature_date, coupon_rate, clean_price)
     bonds.append(bond)
 
-st.header("Conventions")
-day_count = st.selectbox("Day Count Convention: (ZAR Government Bonds default to ACT/365F)",
+st.header("Parameters")
+tab1, tab2 = st.tabs(["Conventions","Bounds"])
+day_count = tab1.selectbox("Day Count Convention: (ZAR Government Bonds default to ACT/365F)",
 ["ACT/365F", "ACT/360", "30/360"])
-interpolation = st.selectbox("Graph Interpolation Method:", ["log_linear", "linear"])
-accruation = st.selectbox("Dirty Price interest accumulation method:", ["linear", "log_linear", "none", "midpoint"])
-face_val = st.number_input("Face value (treated as universal)",min_value=90.0,max_value=110.0, value=100.0)
-coupon_freq = st.number_input("Coupon issueing rate: (Issues per year)",min_value=1,max_value=12, value = 2)
+interpolation = tab1.selectbox("Graph Interpolation Method:", ["log_linear", "linear"])
+accruation = tab1.selectbox("Dirty Price interest accumulation method:", ["linear", "log_linear", "none", "midpoint"])
+face_val = tab1.number_input("Face value (treated as universal)",min_value=90.0,max_value=110.0, value=100.0)
+coupon_freq = tab1.number_input("Coupon issueing rate: (Issues per year)",min_value=1,max_value=12, value = 2)
 
 convs = src.conventions.getConventions(day_count, coupon_freq, interpolation, face_val, accruation)
 
-st.header("Bounds")
-df_upp = st.number_input("Maximum accepted discount factor", max_value=1.01, min_value=0.01, value = 1.0)
-df_low = st.number_input("Minimum accepted discount factor", max_value= df_upp, min_value=0.01)
-rates_upp = st.number_input("Maximum accepted zero rate", max_value=0.5, min_value=0.0, value = 0.25)
-rates_low = st.number_input("Minimum accepted zero rate", max_value=rates_upp, min_value=0.0)
+df_upp = tab2.number_input("Maximum accepted discount factor", max_value=1.01, min_value=0.01, value = 1.0)
+df_low = tab2.number_input("Minimum accepted discount factor", max_value= df_upp, min_value=0.01)
+rates_upp = tab2.number_input("Maximum accepted zero rate", max_value=0.5, min_value=0.0, value = 0.25)
+rates_low = tab2.number_input("Minimum accepted zero rate", max_value=rates_upp, min_value=0.0)
 
 bnds = src.conventions.getBounds(rates_low, rates_upp, df_low, df_upp)
 
-st.header("Settlement Date")
+st.subheader("Settlement Date")
 settlement_date = st.date_input("Enter the settlement date of the bonds", max_value=earliest)
 
 dfs_data, dates = bootstrap_govi_curve(bonds, settlement_date, conventions = convs, bounds = bnds)
