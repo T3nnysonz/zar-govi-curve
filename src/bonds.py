@@ -40,13 +40,16 @@ def accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_va
         accrued_interest = 0;
         
     elif(method == "log_linear"):
-        accrued_period = (settle_date-last_coupon).days # How long since last coupon issue.
-        full_accrue = (next_coupon-last_coupon).days # Full gap between coupons.
-        full_coupon = face_value * (coupon_rate/coupon_freq) # How much a full coupon payout would be.
-        ln_full_coupon = np.log(full_coupon)
-        fraction = accrued_period/full_accrue # What fraction of the current accruation period has been completed.
-        ln_accrued_interest = ln_full_coupon * fraction  # The correct fraction of the accruement of the full coupon.
-        accrued_interest = np.exp(ln_accrued_interest)
+        if(coupon_rate==0):
+            return 0;
+        else:
+            accrued_period = (settle_date-last_coupon).days # How long since last coupon issue.
+            full_accrue = (next_coupon-last_coupon).days # Full gap between coupons.
+            full_coupon = face_value * (coupon_rate/coupon_freq) # How much a full coupon payout would be.
+            ln_full_coupon = np.log(full_coupon)
+            fraction = accrued_period/full_accrue # What fraction of the current accruation period has been completed.
+            ln_accrued_interest = ln_full_coupon * fraction  # The correct fraction of the accruement of the full coupon.
+            accrued_interest = np.exp(ln_accrued_interest)
         
     else:
         print("Unknown accruation method: did not accruate")

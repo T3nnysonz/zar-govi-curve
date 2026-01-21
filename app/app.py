@@ -12,6 +12,7 @@ import src.conventions
 st.set_page_config(layout="wide")
 st.title("ZAR Government Bootstrapper")
 data = ""
+passed = True
 
 try:
     url = st.text_input("Enter url for csv containing bond data:","data/testbonds.csv")
@@ -36,9 +37,14 @@ for row in range(len(data)):
         clean_price = (data['clean_price'][row])
     except:
         st.write("At least 1 column was missing or had name mispelled.")
-        st.write("Expected format: 'day';'month';'year';coupon_rate';'clean_price'")
+        st.write("Expected format: 'day','month','year',coupon_rate','clean_price'")
+        break;
     
-    mature_date = date(year,month,day)
+    try:
+        mature_date = date(year,month,day)
+    except:
+        st.write(f"Invalid date. Bootstrapping halted. Halted on line {row}")
+        break
     
     if(mature_date<earliest):
         earliest = mature_date
@@ -70,8 +76,20 @@ settlement_date = st.date_input("Enter the settlement date of the bonds", max_va
 dfs_data, dates = bootstrap_govi_curve(bonds, settlement_date, conventions = convs, bounds = bnds)
 dfs_curve = DiscountCurve(dfs_data, interpolation=convs["interpolation_method"], bounds=bnds)
 
-x,y = dfs_curve.plot()
-x1, y1 = dfs_curve.plot_zero_rates()
+try:
+    x,y = dfs_curve.plot()
+except Exception as e:
+    st.warning("Error occured while computing Discount Factors" + str(e))
+    x = []
+    y = []
+    passed = False
+try:
+    x1, y1 = dfs_curve.plot_zero_rates()
+except Exception as e:
+    st.warning("An error occured while computing zero-rates, this usually means that the upper bound was exceeded. To prevent this, choose an earlier settlement date. "+ str(e))
+    x1 = []
+    y1 = []
+    passed = False
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4)) #
 fig.set_figwidth(10)
@@ -95,15 +113,18 @@ st.pyplot(fig=fig)
 
 # Table
 
-year_fracs, rates_raw = dfs_curve.plot_zero_rates(False)
-rates = ["Na"]
-for r in rates_raw:
-    rates.append(r)
-year_fracs, dfs = zip(*dfs_data)
-frame = pd.DataFrame({"Date:":dates,"Time in years since settlement:":year_fracs,"Discount Factor:":dfs,"Zero Rates:":rates})
-st.write(frame)
+if(passed):
+    year_fracs, rates_raw = dfs_curve.plot_zero_rates(False)
+    rates = ["Na"]
+    for r in rates_raw:
+        rates.append(r)
+    year_fracs, dfs = zip(*dfs_data)
+    frame = pd.DataFrame({"Date:":dates,"Time in years since settlement:":year_fracs,"Discount Factor:":dfs,"Zero Rates:":rates})
+    st.write(frame)
 
-st.download_button("Download curve as .csv", data=frame.to_csv().encode("utf-8"),file_name="bootstrapped_data.csv")
+    st.download_button("Download curve as .csv", data=frame.to_csv().encode("utf-8"),file_name="bootstrapped_data.csv")
+else:
+    st.warning("Did not generate table due to failure to generate graph(s)")
 
 fn = 'Discount Curve.png'
 img = io.BytesIO()
