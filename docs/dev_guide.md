@@ -61,3 +61,8 @@ repo/
     - 2024-01-15.md
     - 2024-01-16.md
     - ... (daily reports)
+
+# Other Documents
+previous - [Architecture](architecture.md) - Basic architecture for Webapp and bootstrapping logic
+
+next - [Input Format](input_format.md) - Required csv format for the app to run successfully

@@ -21,5 +21,6 @@ $$ DF = \frac{Dirty Price}{Face Value}$$
     5. Solve the above formula for the **Discount Factor** at the k+1'th coupon issueing which is also the maturity date of the selected bond
     
 # Other Documents:
-previous : - [Bond Pricing](bond_pricing.md) - Cash flows, Coupon conevntions, clean/dirty prices  
-next: - 
+previous : - [Bond Pricing](bond_pricing.md) - Cash flows, Coupon conevntions, clean/dirty prices 
+ 
+next: - [Architecture](architecture.md) - Basic architecture for Webapp and bootstrapping logic
