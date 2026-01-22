@@ -22,12 +22,12 @@ def test_zero_coupon_bond():
         {
             'mature_date': date(2025,1,15),
             'coupon_rate': 0.00,  # 0% coupon = zero-coupon bond
-            'clean_price': 95.00
+            'clean_price': 95.00,
+            'settlement_date': date(2024,1,15)
         }
     ]
-    settlement_date = date(2024,1,15)
     
-    known_dfs, dates = bootstrap_govi_curve(bonds, settlement_date, conventions)
+    known_dfs, dates, known_rates = bootstrap_govi_curve(bonds, conventions)
     disCurve = DiscountCurve(known_dfs, interpolation=conventions["interpolation_method"])
     
     # DF at 1 year should be 0.95 (95/100)
@@ -45,21 +45,22 @@ def test_two_par_bonds_flat_curve():
         'face_value': 100,
         'accrued_method': 'linear'
     }
-    settlement_date=date(2024,1,15)
     bonds = [
         {
             'mature_date': date(2025,1,15),
             'coupon_rate': 0.05,  # 5%
-            'clean_price': 100.0  # at par
+            'clean_price': 100.0,  # at par
+            'settlement_date': date(2024,1,15)
         },
         {
             'mature_date': date(2026,1,15),
             'coupon_rate': 0.05,  # 5%
-            'clean_price': 100.0
+            'clean_price': 100.0,
+            'settlement_date': date(2024,1,15)
         }
     ]
     
-    known_dfs, dates = bootstrap_govi_curve(bonds, settlement_date, conventions)
+    known_dfs, dates, rates = bootstrap_govi_curve(bonds, conventions)
     times, dfs = zip(*known_dfs)
     disCurve = DiscountCurve(known_dfs, interpolation=conventions["interpolation_method"])
     
@@ -87,6 +88,8 @@ def test_sample_dataset_regression():
     url = "data/real_data.csv"
     data = pd.read_csv(url, delimiter=",")
     
+    earliest = date(2099,12,31)
+    
     # Convert to list of dicts
     for row in range(len(data)):
         day = (data['day'][row])
@@ -94,13 +97,20 @@ def test_sample_dataset_regression():
         year = (data['year'][row])
         coupon_rate = (data['coupon_rate'][row])
         clean_price = (data['clean_price'][row])
+        s_day = (data['settlement_day'][row])
+        s_month = (data['settlement_month'][row])
+        s_year = (data['settlement_year'][row])
     
         mature_date = date(year,month,day)
+        settlement = date(s_year,s_month,s_day)
+        if(settlement<earliest):
+            earliest=settlement
         
         bond = {
             'mature_date': mature_date,
             'coupon_rate': coupon_rate,
-            'clean_price': clean_price
+            'clean_price': clean_price,
+            'settlement_date': settlement
         }
         bonds.append(bond)
     
@@ -109,16 +119,14 @@ def test_sample_dataset_regression():
     expected_df = pd.read_csv(expected_path, delimiter=",")
     
     # Run bootstrap
-    settlement = date(2025,10,2)  # All bonds should have same settlement
-    discount_factors, dates = bootstrap_govi_curve(bonds, settlement, conventions)
-    disc_curve = DiscountCurve(discount_factors, conventions["interpolation_method"])
+    discount_factors, dates, rates = bootstrap_govi_curve(bonds, conventions)
+    df_times, df_vals = zip(*discount_factors)
+    rate_times, rate_vals = zip(*rates)
     
     # Compare at key points
-    time_points = []
-    exp_dfs = []
+    comparison_times = [0]
+    exp_dfs = [1]
     exp_rates = []
-    act_dfs = []
-    act_rates = []
     for row in range(len(expected_df)):
         day = (expected_df['day'][row])
         month = (expected_df['month'][row])
@@ -128,18 +136,11 @@ def test_sample_dataset_regression():
         
         exp_dfs.append(dsFact)
         exp_rates.append(dsRate)
-    
-        mature_date = date(year,month,day)
-        time_point = year_fraction(settlement, mature_date, conventions['day_count'])
-        time_points.append(time_point)
-        
-        actual_df = disc_curve.calcDF(time_point)
-        actual_zero = disc_curve.rate_from_df(time_point)
-        act_dfs.append(actual_df)
-        act_rates.append(actual_zero)
+        comp = date(year, month, day)
+        comparison_times.append(year_fraction(earliest, comp, conventions['day_count']))
 
-    plt.plot(time_points, act_dfs, label = "Mine")
-    plt.plot(time_points, exp_dfs, label = "Murex")
+    plt.plot(df_times, df_vals, label = "Mine")
+    plt.plot(comparison_times, exp_dfs, label = "Murex")
     plt.title("Discount factor comparison")
     plt.xlabel("Time in years since settlement")
     plt.ylabel("Discount factor")
@@ -147,8 +148,10 @@ def test_sample_dataset_regression():
     plt.grid()
     plt.show()
     
-    plt.plot(time_points, act_rates, label = "Mine")
-    plt.plot(time_points, exp_rates, label = "Murex")
+#    time_points, act_rates = disc_curve.plot_zero_rates()
+    
+    plt.plot(rate_times, rate_vals, label = "Mine")
+    plt.plot(comparison_times[1:], exp_rates, label = "Murex")
     plt.title("Zero rate comparison")
     plt.xlabel("Time in years since settlement")
     plt.ylabel("Zero rate")
@@ -156,13 +159,17 @@ def test_sample_dataset_regression():
     plt.grid()
     plt.show()
     
-    act_dfs = np.array(act_dfs)
+    
+    df_vals = np.array(df_vals)
     exp_dfs = np.array(exp_dfs)
-    act_rates = np.array(act_rates)
+    rate_vals = np.array(rate_vals)
     exp_rates = np.array(exp_rates)
-    print(abs(act_dfs-exp_dfs)/exp_dfs)
+    print(abs(df_vals-exp_dfs)/exp_dfs)
     print("---------------")
-    print(abs(act_rates-exp_rates)/exp_rates)
+    print(abs(rate_vals-exp_rates)/exp_rates)
+    
+    print(f"worst df, {max(abs(df_vals-exp_dfs))}")
+    print(f"worst rate, {max(abs(rate_vals-exp_rates))}")
 choice1 = input("Test bootstrapping for zero coupon bond? Enter [y/n]")
 if(choice1 == 'y'):
     test_zero_coupon_bond()

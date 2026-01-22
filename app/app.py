@@ -24,10 +24,9 @@ st.header("Raw data")
 
 bonds = []
 st.write(data)
-
 earliest = date(2099, 12, 31)
 
-# Logic for computing dfs.
+# Bond creation.
 for row in range(len(data)):
     try:
         day = (data['day'][row])
@@ -35,6 +34,9 @@ for row in range(len(data)):
         year = (data['year'][row])
         coupon_rate = (data['coupon_rate'][row])
         clean_price = (data['clean_price'][row])
+        s_day = (data['settlement_day'][row])#
+        s_month = (data['settlement_month'][row])#
+        s_year = (data['settlement_year'][row])#
     except:
         st.write("At least 1 column was missing or had name mispelled.")
         st.write("Expected format: 'day','month','year',coupon_rate','clean_price'")
@@ -42,6 +44,7 @@ for row in range(len(data)):
     
     try:
         mature_date = date(year,month,day)
+        settlement_date = date(s_year, s_month, s_day)#
     except:
         st.write(f"Invalid date. Bootstrapping halted. Halted on line {row}")
         break
@@ -49,7 +52,7 @@ for row in range(len(data)):
     if(mature_date<earliest):
         earliest = mature_date
     
-    bond = src.conventions.getBond(mature_date, coupon_rate, clean_price)
+    bond = src.conventions.getBond(mature_date, coupon_rate, clean_price, settlement_date)#
     bonds.append(bond)
 
 st.header("Parameters")
@@ -69,17 +72,16 @@ rates_upp = tab2.number_input("Maximum accepted zero rate", max_value=0.5, min_v
 rates_low = tab2.number_input("Minimum accepted zero rate", max_value=rates_upp, min_value=0.0)
 
 bnds = src.conventions.getBounds(rates_low, rates_upp, df_low, df_upp)
-
-st.subheader("Settlement Date")
-settlement_date = st.date_input("Enter the settlement date of the bonds", max_value=earliest)
-
-dfs_data, dates = bootstrap_govi_curve(bonds, settlement_date, conventions = convs, bounds = bnds)
-dfs_curve = DiscountCurve(dfs_data, interpolation=convs["interpolation_method"], bounds=bnds)
+try:
+    dfs_data, dates, rates_data = bootstrap_govi_curve(bonds, conventions = convs, bounds = bnds)#
+    dfs_curve = DiscountCurve(dfs_data, interpolation=convs["interpolation_method"], bounds=bnds)
+except Exception as e:
+    st.warning("An error occured during bootstrapping: " + str(e))
 
 try:
     x,y = dfs_curve.plot()
 except Exception as e:
-    st.warning("Error occured while computing Discount Factors" + str(e))
+    st.warning("Error occured while plotting Discount Factors" + str(e))
     x = []
     y = []
     passed = False
@@ -114,7 +116,7 @@ st.pyplot(fig=fig)
 # Table
 
 if(passed):
-    year_fracs, rates_raw = dfs_curve.plot_zero_rates(False)
+    year_fracs, rates_raw = zip(*rates_data)
     rates = ["Na"]
     for r in rates_raw:
         rates.append(r)

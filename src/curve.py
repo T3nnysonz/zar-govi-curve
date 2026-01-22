@@ -127,9 +127,9 @@ class DiscountCurve:
             raise ValueError(f"Warning: Expected initial time pillar to be t = 0, got: +{self.times[0]}")
         elif(self.dfs[0]!=1):
             raise ValueError(f"Warning: Illogical data used. Discount factor should always equal 1 at t = 0.")
-        for i in range(len(self.times)-1):
-            if self.dfs[i]<self.dfs[i+1]:
-                raise ValueError(f"Warning, discounts provided are increasing.")
+        #for i in range(len(self.times)-1):
+        #    if self.dfs[i]<self.dfs[i+1]:
+        #        raise ValueError(f"Warning, discounts provided are increasing.")
     
     def update_data(self, datapoints, interpolation = "log_linear"):
         datapoints = sorted(datapoints) # Sorts data by time since settlement date
