@@ -86,7 +86,7 @@ except Exception as e:
     y = []
     passed = False
 try:
-    x1, y1 = dfs_curve.plot_zero_rates()
+    x1, y1 = dfs_curve.plot_zero_rates(coupon_freq)
 except Exception as e:
     st.warning("An error occured while computing zero-rates, this usually means that the upper bound was exceeded. To prevent this, choose an earlier settlement date. "+ str(e))
     x1 = []

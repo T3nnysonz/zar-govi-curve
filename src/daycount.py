@@ -1,6 +1,6 @@
 import numpy
 
-def year_fraction(start_date, end_date, day_count="ACT/365F"):
+def year_fraction(start_date, end_date, day_count="ACT/365F"):#
     '''
     Description: returns amount of time between the start and end date as a float number of years
     

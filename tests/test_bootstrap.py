@@ -66,8 +66,8 @@ def test_two_par_bonds_flat_curve():
     
     
     # Zero rates should be ~5% at both maturities
-    zero1 = disCurve.rate_from_df(times[1])   # 1 year
-    zero2 = disCurve.rate_from_df(times[2])   # 2 years
+    zero1 = disCurve.rate_from_df(times[1], 1)   # 1 year
+    zero2 = disCurve.rate_from_df(times[2], 1)   # 2 years
     
     # Should be close to 5% (allow for compounding differences)
     print(f"zero-rate after 1 year:{zero1} Expected: 0.05, absolute difference: {abs(zero1 - 0.05)}")
@@ -148,8 +148,6 @@ def test_sample_dataset_regression():
     plt.grid()
     plt.show()
     
-#    time_points, act_rates = disc_curve.plot_zero_rates()
-    
     plt.plot(rate_times, rate_vals, label = "Mine")
     plt.plot(comparison_times[1:], exp_rates, label = "Murex")
     plt.title("Zero rate comparison")
@@ -170,6 +168,44 @@ def test_sample_dataset_regression():
     
     print(f"worst df, {max(abs(df_vals-exp_dfs))}")
     print(f"worst rate, {max(abs(rate_vals-exp_rates))}")
+    
+def test_simple_bootstrap():
+    """Test with known values"""
+    bonds = [
+        {
+            'mature_date': pd.Timestamp('2025-01-15').date(),
+            'coupon_rate': 0.05,  # 5%
+            'clean_price': 100.0,  # At par
+            'settlement_date': pd.Timestamp('2024-01-15').date(),
+        },
+        {
+            'mature_date': pd.Timestamp('2026-01-15').date(),
+            'coupon_rate': 0.06,  # 6%
+            'clean_price': 99.0,
+            'settlement_date': pd.Timestamp('2024-01-15').date(),
+        }
+    ]
+    conventions = {
+        'day_count': 'ACT/365F',
+        'coupon_frequency': 1,
+        'interpolation_method': 'log_linear',
+        'face_value': 100,
+        'accrued_method': 'linear'
+    }
+    
+    dfs, dates, rates = bootstrap_govi_curve(bonds,conventions)
+    
+    print("Discount Factors:")
+    for t, df in dfs:
+        print(f"  t={t:.4f}, DF={df:.6f}")
+    
+    print("\nZero Rates:")
+    for t, rate in rates:
+        print(f"  t={t:.4f}, Rate={rate:.6%}")
+    
+    # First bond at par: zero rate should be ~5%
+    assert abs(rates[0][1] - 0.05) < 0.001
+    
 choice1 = input("Test bootstrapping for zero coupon bond? Enter [y/n]")
 if(choice1 == 'y'):
     test_zero_coupon_bond()
@@ -190,6 +226,14 @@ choice3 = input("Test bootstrapping for sample murex data? Enter [y/n]")
 if(choice3 == 'y'):
     test_sample_dataset_regression()
 elif(choice3 == 'n'):
+    pass
+else:
+    print("Unrecognised input, enter either 'y' for yes or 'n' for no")
+    
+choice4 = input("Test simple bootstrap? Enter [y/n]")
+if(choice4 == 'y'):
+    test_simple_bootstrap()
+elif(choice4 == 'n'):
     pass
 else:
     print("Unrecognised input, enter either 'y' for yes or 'n' for no")

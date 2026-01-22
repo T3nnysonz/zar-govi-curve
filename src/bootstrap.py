@@ -51,8 +51,7 @@ def bootstrap_govi_curve(bonds, conventions = None, bounds = None):
             new_DF = df.calcDF(year_fraction(dates[0], settlement_date, day_count))*(dirtyPrice-known)/final_payment # Solves for the desired Discount Factor
             known_dfs.append((year_frac, new_DF))
             df.update_data(known_dfs) # Updates Discount Curve
-            known_rates.append((year_frac, df.rate_from_df(year_frac)))
-            #known_rates.append((year_frac, 1/np.power(new_DF,1/year_frac)-1))
+            known_rates.append((year_frac, df.rate_from_df(year_frac, freq)))
             dates.append(date1)
         else:
             print("Unable to calculate df's") # Handles exceptions

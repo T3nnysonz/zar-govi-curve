@@ -58,4 +58,4 @@ def accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_va
 
 def dirty_price(clean_price, settle_date, last_coupon, next_coupon, coupon_rate, face_value = 100, coupon_freq = 2, method = "linear"):
     dirty_price = clean_price + accrued_interest(settle_date, last_coupon, next_coupon, coupon_rate, face_value, coupon_freq, method)
-    return dirty_price;
+    return dirty_price;#

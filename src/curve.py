@@ -55,14 +55,12 @@ class DiscountCurve:
             return zip(self.times, self.dfs)
 
     def calcDF(self, t):
-        # The idea behind this function is to find which 2 time pillars surround the t we are
-        # interested in. Then we use interpolation to find the correct df value.
-        
         before = 0 # will be used to find the latest time pillar before t
         after = 0 # will be used to find the earliest time pillar after t
         i = -1 # will be used to index the Discount Factor array later
         for time in self.times:
             if(before <= t and t <= after): # Checks if we have surrounded t, this method produces an edge case
+                print("here")
                 break
             else: # Iterates
                 before = after
@@ -98,7 +96,7 @@ class DiscountCurve:
         else:
             return self.times, self.dfs
     
-    def plot_zero_rates(self, Interpolated = True): # Misleading name, function returns the data needed to plot the curve
+    def plot_zero_rates(self, freq, Interpolated = True): # Misleading name, function returns the data needed to plot the curve
         if(Interpolated): # interpolation is set true when graphing for clean visuals and false for tables for easy reading
             datapoints = self.interpolate() # rather than coding a new interpolation function, we simply interpolate dfs before converting to rates
         else:
@@ -106,12 +104,12 @@ class DiscountCurve:
         
         rates = []
         times = []
-        for time, date in datapoints:
+        for time, ___ in datapoints:
             if(time == 0):
                 continue # Do not plot zero rates for t = 0, which normally leads to an undefined expression
             else:
                 times.append(time) # appends time pillar data
-                rates.append(self.rate_from_df(time)) # calculates zero rates and appends pillar data
+                rates.append(self.rate_from_df(time, freq)) # calculates zero rates and appends pillar data
                 
         return times, rates
     
@@ -127,9 +125,9 @@ class DiscountCurve:
             raise ValueError(f"Warning: Expected initial time pillar to be t = 0, got: +{self.times[0]}")
         elif(self.dfs[0]!=1):
             raise ValueError(f"Warning: Illogical data used. Discount factor should always equal 1 at t = 0.")
-        #for i in range(len(self.times)-1):
-        #    if self.dfs[i]<self.dfs[i+1]:
-        #        raise ValueError(f"Warning, discounts provided are increasing.")
+        for i in range(len(self.times)-1):
+            if self.dfs[i]<self.dfs[i+1]:
+                raise ValueError(f"Warning, discounts provided are increasing.")
     
     def update_data(self, datapoints, interpolation = "log_linear"):
         datapoints = sorted(datapoints) # Sorts data by time since settlement date
@@ -142,13 +140,13 @@ class DiscountCurve:
         
         self.validate(); # Checks that the updated curve is valid
         
-    def rate_from_df(self, time):
+    def rate_from_df(self, time, freq):
         df = self.calcDF(time) # calucaltes df at time = time which will later be used to calculate zero rate
-        rate = 1/np.power(df,1/time)-1 # Discrete formula for conversion from discount factor to zero rate
+        rate = freq*(1/np.power(df,1/(freq*time))-1) # Discrete formula for conversion from discount factor to zero rate
         #rate = -np.log(df)/time # Continuous formula, less accurate against murex results
         if rate < self.bounds['min_rate']: # validating rates
             raise ValueError(f"Warning: Rate {rate:.2%} at t={time:.2f} below minimum")
         if rate > self.bounds['max_rate']: # validating rates
             raise ValueError(f"Warning: Rate {rate:.2%} at t={time:.2f} above maximum")
         return rate
-    
+    #
