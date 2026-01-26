@@ -26,3 +26,9 @@ This project primarily provides a means through which bonds may be bootstrapped.
 - Discipline: I learned how to dedicate 8-9 hours a day to a project for many days in a row.
 - Debugging: I became much more proficient in code debugging.
 - Healthy work relationship with AI: I learned to neither neglect the opinions of AI when doing projects, (due to its superior understanding of the underlying finance) nor be too reliant on it as it was never able to debug me code.
+
+## Next Steps:
+
+- Improve bootstrapping quality to lower discrepency with Murex results.
+- Improve csv importing system
+- Implement forward-rates

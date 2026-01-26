@@ -78,7 +78,7 @@ def test_sample_dataset_regression():
     bonds = []
     conventions = {
         'day_count': 'ACT/365F',
-        'coupon_frequency': 1,
+        'coupon_frequency': 4,
         'interpolation_method': 'log_linear',
         'face_value': 100,
         'accrued_method': 'linear'
