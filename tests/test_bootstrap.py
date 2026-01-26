@@ -92,17 +92,11 @@ def test_sample_dataset_regression():
     
     # Convert to list of dicts
     for row in range(len(data)):
-        day = (data['day'][row])
-        month = (data['month'][row])
-        year = (data['year'][row])
         coupon_rate = (data['coupon_rate'][row])
         clean_price = (data['clean_price'][row])
-        s_day = (data['settlement_day'][row])
-        s_month = (data['settlement_month'][row])
-        s_year = (data['settlement_year'][row])
     
-        mature_date = date(year,month,day)
-        settlement = date(s_year,s_month,s_day)
+        mature_date = pd.Timestamp(data['maturity_date'][row]).date()
+        settlement = pd.Timestamp(data['settlement_date'][row]).date()
         if(settlement<earliest):
             earliest=settlement
         

@@ -29,22 +29,16 @@ earliest = date(2099, 12, 31)
 # Bond creation.
 for row in range(len(data)):
     try:
-        day = (data['day'][row])
-        month = (data['month'][row])
-        year = (data['year'][row])
         coupon_rate = (data['coupon_rate'][row])
         clean_price = (data['clean_price'][row])
-        s_day = (data['settlement_day'][row])#
-        s_month = (data['settlement_month'][row])#
-        s_year = (data['settlement_year'][row])#
     except:
         st.write("At least 1 column was missing or had name mispelled.")
-        st.write("Expected format: 'day','month','year',coupon_rate','clean_price'")
+        st.write("Expected format: 'maturity_date',coupon_rate','clean_price','settlement_date'")
         break;
     
     try:
-        mature_date = date(year,month,day)
-        settlement_date = date(s_year, s_month, s_day)#
+        mature_date = pd.Timestamp(data['maturity_date'][row]).date()
+        settlement_date = pd.Timestamp(data['settlement_date'][row]).date()
     except:
         st.write(f"Invalid date. Bootstrapping halted. Halted on line {row}")
         break
