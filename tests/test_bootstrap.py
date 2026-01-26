@@ -181,7 +181,7 @@ def test_simple_bootstrap():
     ]
     conventions = {
         'day_count': 'ACT/365F',
-        'coupon_frequency': 1,
+        'coupon_frequency': 2,
         'interpolation_method': 'log_linear',
         'face_value': 100,
         'accrued_method': 'linear'

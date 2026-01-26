@@ -86,7 +86,7 @@ def bootstrap_govi_curve(bonds, conventions = None, bounds = None):
             df.update_data(known_dfs)
             
             # Use the bond's frequency for rate calculation
-            known_rates.append((t_final, df.rate_from_df(t_final, freq)))
+            known_rates.append((t_final, df.rate_from_df(t_final)))
         else:
             print(f"No cashflows for bond maturing {mature_date}")
     
