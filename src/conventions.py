@@ -17,11 +17,12 @@ def getConventions(day_count, coupon_frequency, interpolation_method, face_value
     }
     return conventions;
 
-def getBond(mature_date, coupon_rate, clean_price, settlement_date):
-    bond = {
+def getInstrument(mature_date, rate, clean_price, settlement_date,type):
+    inst = {
         "mature_date":mature_date,
-        "coupon_rate":coupon_rate,
+        "rate":rate,
         "clean_price":clean_price,
-        "settlement_date":settlement_date
+        "settlement_date":settlement_date,
+        "type":type
     }
-    return bond;
+    return inst;

@@ -1,4 +1,4 @@
-coupon_rate,clean_price,maturity_date,settlement_date,type
+rate,clean_price,maturity_date,settlement_date,type
 0.055,100,2025-10-3,2025-10-2,bond
 0.046,100,2025-11-3,2025-10-2,bond
 0.07,100,2026-1-2,2025-10-2,bond

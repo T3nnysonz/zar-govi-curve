@@ -21,9 +21,10 @@ def test_zero_coupon_bond():
     bonds = [
         {
             'mature_date': date(2025,1,15),
-            'coupon_rate': 0.00,  # 0% coupon = zero-coupon bond
+            'rate': 0.00,  # 0% coupon = zero-coupon bond
             'clean_price': 95.00,
-            'settlement_date': date(2024,1,15)
+            'settlement_date': date(2024,1,15),
+            'type': "bond"
         }
     ]
     
@@ -48,15 +49,17 @@ def test_two_par_bonds_flat_curve():
     bonds = [
         {
             'mature_date': date(2025,1,15),
-            'coupon_rate': 0.05,  # 5%
+            'rate': 0.05,  # 5%
             'clean_price': 100.0,  # at par
-            'settlement_date': date(2024,1,15)
+            'settlement_date': date(2024,1,15),
+            'type': "bond"
         },
         {
             'mature_date': date(2026,1,15),
-            'coupon_rate': 0.05,  # 5%
+            'rate': 0.05,  # 5%
             'clean_price': 100.0,
-            'settlement_date': date(2024,1,15)
+            'settlement_date': date(2024,1,15),
+            'type': "bond"
         }
     ]
     
@@ -66,8 +69,8 @@ def test_two_par_bonds_flat_curve():
     
     
     # Zero rates should be ~5% at both maturities
-    zero1 = disCurve.rate_from_df(times[1], 1)   # 1 year
-    zero2 = disCurve.rate_from_df(times[2], 1)   # 2 years
+    zero1 = rates[0][1]   # 1 year
+    zero2 = rates[1][1]   # 2 years
     
     # Should be close to 5% (allow for compounding differences)
     print(f"zero-rate after 1 year:{zero1} Expected: 0.05, absolute difference: {abs(zero1 - 0.05)}")
@@ -75,7 +78,7 @@ def test_two_par_bonds_flat_curve():
 
 def test_sample_dataset_regression():
     """Test that bootstrap produces same results as saved reference"""
-    bonds = []
+    instruments = []
     conventions = {
         'day_count': 'ACT/365F',
         'coupon_frequency': 4,
@@ -92,7 +95,7 @@ def test_sample_dataset_regression():
     
     # Convert to list of dicts
     for row in range(len(data)):
-        coupon_rate = (data['coupon_rate'][row])
+        rate = (data['rate'][row])
         clean_price = (data['clean_price'][row])
         type = (data['type'][row])
     
@@ -101,21 +104,21 @@ def test_sample_dataset_regression():
         if(settlement<earliest):
             earliest=settlement
         
-        bond = {
+        inst = {
             'mature_date': mature_date,
-            'coupon_rate': coupon_rate,
+            'rate': rate,
             'clean_price': clean_price,
             'settlement_date': settlement,
             'type': type
         }
-        bonds.append(bond)
+        instruments.append(inst)
     
     # Load expected results (saved from a known-good run)
     expected_path = "data/expected_output.csv" # Some approximations were made when copying the murex data
     expected_df = pd.read_csv(expected_path, delimiter=",")
     
     # Run bootstrap
-    discount_factors, dates, rates = bootstrap_govi_curve(bonds, conventions)
+    discount_factors, dates, rates = bootstrap_govi_curve(instruments, conventions)
     df_times, df_vals = zip(*discount_factors)
     rate_times, rate_vals = zip(*rates)
     
@@ -170,15 +173,17 @@ def test_simple_bootstrap():
     bonds = [
         {
             'mature_date': pd.Timestamp('2025-01-15').date(),
-            'coupon_rate': 0.05,  # 5%
+            'rate': 0.05,  # 5%
             'clean_price': 100.0,  # At par
             'settlement_date': pd.Timestamp('2024-01-15').date(),
+            'type': "bond"
         },
         {
             'mature_date': pd.Timestamp('2026-01-15').date(),
-            'coupon_rate': 0.06,  # 6%
+            'rate': 0.06,  # 6%
             'clean_price': 99.0,
             'settlement_date': pd.Timestamp('2024-01-15').date(),
+            'type': "bond"
         }
     ]
     conventions = {

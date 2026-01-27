@@ -140,7 +140,6 @@ class DiscountCurve:
         
     def rate_from_df(self, time):
         df = self.calcDF(time) # calucaltes df at time = time which will later be used to calculate zero rate
-        #rate = freq*(1/np.power(df,1/(freq*time))-1) # Discrete formula for conversion from discount factor to zero rate
         rate = -np.log(df)/time # Continuous formula, less accurate against murex results
         if rate < self.bounds['min_rate']: # validating rates
             raise ValueError(f"Warning: Rate {rate:.2%} at t={time:.2f} below minimum")

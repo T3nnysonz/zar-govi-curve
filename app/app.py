@@ -26,28 +26,25 @@ bonds = []
 st.write(data)
 earliest = date(2099, 12, 31)
 
-# Bond creation.
+# Instrument creation.
 for row in range(len(data)):
     try:
-        coupon_rate = (data['coupon_rate'][row])
+        rate = (data['rate'][row])
         clean_price = (data['clean_price'][row])
-    except:
-        st.write("At least 1 column was missing or had name mispelled.")
-        st.write("Expected format: 'maturity_date',coupon_rate','clean_price','settlement_date'")
-        break;
-    
-    try:
+        type = (data['type'][row])
         mature_date = pd.Timestamp(data['maturity_date'][row]).date()
         settlement_date = pd.Timestamp(data['settlement_date'][row]).date()
     except:
         st.write(f"Invalid date. Bootstrapping halted. Halted on line {row}")
+        st.write("At least 1 column was missing or had name mispelled.")
+        st.write("Expected format: 'maturity_date',coupon_rate','clean_price','settlement_date'")
         break
     
     if(mature_date<earliest):
         earliest = mature_date
     
-    bond = src.conventions.getBond(mature_date, coupon_rate, clean_price, settlement_date)#
-    bonds.append(bond)
+    inst = src.conventions.getInstrument(mature_date, rate, clean_price, settlement_date, type)
+    bonds.append(inst)
 
 st.header("Parameters")
 tab1, tab2 = st.tabs(["Conventions","Bounds"])
