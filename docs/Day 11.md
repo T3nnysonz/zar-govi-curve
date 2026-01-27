@@ -22,4 +22,42 @@ If party B is correct, they save money in payouts whereas party A loses money in
 
 # Forward Rate agreements
 
-Not understood yet. Something about risk management. The quoted rate and the market rate are compared at maturity to determine payout, but the I don't understand the specifics.
+A Forward Rate Agreement is another kind of gamble between parties. Party A informs Party B of their desire to enter an FRA using a certain principal amount. Party A and Party B agree on a "forward rate", which is a mutually agreed upon predicted interest rate at some point in the future. Then, Party A is essentially betting that the actual interest rate at the agreed date (the settlement date) will be less than the predicted forward rate; in which case Party B will pay Party A the difference between the expected interest rate and actual interest rate applied on the principal sum. Otherwise, if the market performs better than expected, Party A will pay Party B the difference between the expected interest rate and actual interest rate applied on the principal sum.
+
+In either case, the difference between expected and actual interest rates is applied to the principal over a period designated before the settlement date.
+
+## Forward rate calculation
+
+While the forward rate used is inevitably decided by mutual agreement, the standard practice is to use the "fair" formula given by:
+
+$$
+F(T1,T2) = \frac{1}{T2-T1} \times \left( \frac{DF(T1)}{DF(T2)} - 1 \right)
+$$
+
+### Implementation
+
+In my bond CSVs, I could add a column for "FRA" which takes True and False. The bootstrapping function could read whether or not the bond is FRA. If not, nothing changes. But if the bond is FRA, then the bootstrapping algorithm will use a different equation. In particular, from:
+
+$$
+F(T1,T2) = \frac{1}{T2-T1} \times \left( \frac{DF(T1)}{DF(T2)} - 1 \right)
+$$
+
+It follows that:
+
+$$
+F(T1,T2)\times (T2-T1) = \frac{DF(T1)}{DF(T2)} - 1
+$$
+
+$$
+F(T1,T2)\times (T2-T1) +1= \frac{DF(T1)}{DF(T2)}
+$$
+
+$$
+DF(T2)= \frac{DF(T1)}{F(T1,T2)\times (T2-T1) + 1}
+$$
+
+and F(T1,T2) can be quoted from databases like JIBAR, thus we can simply consider it a constant k.
+
+$$
+DF(T2)= \frac{DF(T1)}{k\times (T2-T1) + 1}
+$$

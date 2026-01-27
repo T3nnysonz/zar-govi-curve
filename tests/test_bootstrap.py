@@ -94,6 +94,7 @@ def test_sample_dataset_regression():
     for row in range(len(data)):
         coupon_rate = (data['coupon_rate'][row])
         clean_price = (data['clean_price'][row])
+        type = (data['type'][row])
     
         mature_date = pd.Timestamp(data['maturity_date'][row]).date()
         settlement = pd.Timestamp(data['settlement_date'][row]).date()
@@ -104,7 +105,8 @@ def test_sample_dataset_regression():
             'mature_date': mature_date,
             'coupon_rate': coupon_rate,
             'clean_price': clean_price,
-            'settlement_date': settlement
+            'settlement_date': settlement,
+            'type': type
         }
         bonds.append(bond)
     
@@ -156,9 +158,9 @@ def test_sample_dataset_regression():
     exp_dfs = np.array(exp_dfs)
     rate_vals = np.array(rate_vals)
     exp_rates = np.array(exp_rates)
-    print(abs(df_vals-exp_dfs)/exp_dfs)
+    print(abs(df_vals-exp_dfs))
     print("---------------")
-    print(abs(rate_vals-exp_rates)/exp_rates)
+    print(abs(rate_vals-exp_rates))
     
     print(f"worst df, {max(abs(df_vals-exp_dfs))}")
     print(f"worst rate, {max(abs(rate_vals-exp_rates))}")

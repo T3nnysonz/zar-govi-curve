@@ -147,4 +147,11 @@ class DiscountCurve:
         if rate > self.bounds['max_rate']: # validating rates
             raise ValueError(f"Warning: Rate {rate:.2%} at t={time:.2f} above maximum")
         return rate
-    #
+    
+    def forward_rate(self, t1, t2):
+        settle = min(t1,t2)
+        mature = max(t1,t2)
+        df1 = self.calcDF(settle)
+        df2 = self.calcDF(mature)
+        f = 1/(mature-settle) * (df1/df2 - 1)
+        return f
