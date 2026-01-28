@@ -9,6 +9,7 @@ def bootstrap_govi_curve(bonds, conventions = None, bounds = None):
         
     # Find the earliest settlement date as the reference point
     reference_date = min([b['settlement_date'] for b in bonds])
+    pillardates = [reference_date]
     
     # Sort bonds by maturity date
     sorted_bonds = sorted(bonds, key=lambda b: b['mature_date'])
@@ -31,6 +32,8 @@ def bootstrap_govi_curve(bonds, conventions = None, bounds = None):
         clean_price = bond["clean_price"]
         settlement_date = bond["settlement_date"]
         type = bond["type"]
+        
+        pillardates.append(mature_date)
     
         if(type == "FRA"): 
             new_DF, t = bootstrapFRA(reference_date, settlement_date, mature_date, day_count, df, rate)
@@ -40,7 +43,7 @@ def bootstrap_govi_curve(bonds, conventions = None, bounds = None):
         elif(type == "swap"): # Not working
             df_settle = df.calcDF(year_fraction(reference_date, settlement_date, day_count))
             sum = 0
-            dates = generate_swap_fixed_leg(settlement_date, mature_date)
+            dates = generate_swap_fixed_leg(settlement_date, mature_date, 2)
             t = year_fraction(settlement_date,mature_date,day_count)
             
             for i, date in enumerate(dates):
@@ -61,7 +64,7 @@ def bootstrap_govi_curve(bonds, conventions = None, bounds = None):
             known_dfs.append((t, new_DF))
             df.update_data(known_dfs)
             known_rates.append((t, df.rate_from_df(t)))
-        else:    
+        elif(type == "bond"):    
             freq = default_freq
             
             # Generate cashflows with correct frequency
@@ -77,11 +80,8 @@ def bootstrap_govi_curve(bonds, conventions = None, bounds = None):
             dirtyPrice = dirty_price(clean_price, settlement_date, previous_coupon, next_coupon, 
                                     rate, face_value, coupon_freq=freq, method=accrue_method)
             
-            # Time from reference date to settlement date
             t_settle = year_fraction(reference_date, settlement_date, day_count)
             df_settle = df.calcDF(t_settle)
-            
-            # KEY CHANGE: Use interpolation for ALL cashflows except the final one
             known = 0
             final_cashflow = None
             
@@ -92,7 +92,6 @@ def bootstrap_govi_curve(bonds, conventions = None, bounds = None):
                     # This is the final cashflow - we'll bootstrap this
                     final_cashflow = (date, flow, t_cf)
                 else:
-                    # For all intermediate cashflows, use interpolated DF
                     known += flow * df.calcDF(t_cf)
             
             if final_cashflow is not None:
@@ -100,27 +99,20 @@ def bootstrap_govi_curve(bonds, conventions = None, bounds = None):
                 
                 # Check if we already have this maturity (avoid duplicates)
                 if t_final in [t for t, _ in known_dfs]:
-                    print(f"Skipping duplicate maturity at t={t_final:.4f}")
                     continue
                 
                 # Bootstrap the new DF
                 new_DF = (dirtyPrice * df_settle - known) / final_payment
                 
-                # Validate the new DF is reasonable
-                if new_DF <= 0 or new_DF > 1.02:
-                    print(f"Warning: Unusual DF={new_DF:.6f} for bond maturing {mature_date}")
-                    print(f"  Dirty price: {dirtyPrice:.4f}, Known PV: {known:.4f}, Final payment: {final_payment:.4f}")
-                    # You can choose to skip or continue here
-                
                 known_dfs.append((t_final, new_DF))
                 df.update_data(known_dfs)
-                
-                # Use the bond's frequency for rate calculation
                 known_rates.append((t_final, df.rate_from_df(t_final)))
             else:
                 print(f"No cashflows for bond maturing {mature_date}")
+        else:
+            print("Unrecognized instrument type: skipping bootstrap, may lead to invalid results")
     
-    return known_dfs, [reference_date] + [cf[0] for cf in sorted(known_dfs)[1:]], known_rates
+    return known_dfs, pillardates, known_rates
 
 def getConventions(conventions):
     if(conventions is None):

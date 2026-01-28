@@ -10,7 +10,7 @@ This project primarily provides a means through which bonds may be bootstrapped.
 |---------|----------|
 |A working curve engine (Python) that bootstraps a ZAR government (govi) zero curve from government bond inputs. | Yes |
 |A basic webapp that lets a user load/enter bond data, run bootstrap, and visualize/export the resulting curve. | Yes |
-|Outputs validated against a Murex environment: curve outputs are reconciled to Murex results using an agreed comparison method and tolerance, with differences explained and documented.| No, the curve was validated against Murex, but I failed to meet suitable tolerance. Differences explained to the full extent that I understood them. |
+|Outputs validated against a Murex environment: curve outputs are reconciled to Murex results using an agreed comparison method and tolerance, with differences explained and documented.| Somewhat, the curve was validated against Murex, but I failed to meet strict tolerance. |
 |Clear documentation in Markdown, including concept notes (TVM, bond pricing, bootstrapping steps, conventions), “how to run”, “how it works”, and Mermaid diagrams where helpful.| Yes |
 |A daily written report submitted by 17:00 each working day. | Yes |
 
@@ -25,10 +25,11 @@ This project primarily provides a means through which bonds may be bootstrapped.
 - Mermaid: I learned how to create flow charts on mermaid which provide me a tool for communicating complex system processes.
 - Discipline: I learned how to dedicate 8-9 hours a day to a project for many days in a row.
 - Debugging: I became much more proficient in code debugging.
-- Healthy work relationship with AI: I learned to neither neglect the opinions of AI when doing projects, (due to its superior understanding of the underlying finance) nor be too reliant on it as it was never able to debug me code.
+- Healthy work relationship with AI: I learned to neither neglect the opinions of AI when doing projects, (due to its superior understanding of the underlying finance) nor be too reliant on it as it was never able to debug my code.
 
 ## Next Steps:
 
 - Improve bootstrapping quality to lower discrepency with Murex results.
 - Improve csv importing system
-- Implement forward-rates
+- Improve swap bootstrapping algorithm
+- Switch to Jacobian system

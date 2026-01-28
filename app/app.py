@@ -14,15 +14,53 @@ st.title("ZAR Government Bootstrapper")
 data = ""
 passed = True
 
+@st.dialog("Conventions Help")
+def helpConventions():
+    st.subheader("Day Count Convention")
+    st.write("Different markets calculate the time between dates differently. Each method is called a day count")
+    st.write("- ACT/365F: Considers all years to have 365 days.")
+    st.write("- ACT/360: Condisders all years to have 360 days.")
+    st.write("- 30/360: Considers all months to have 30 days.")
+    st.subheader("Graph Interpolation method")
+    st.write("The provided raw data can only be used to precisely calculate curve data at fixed pillars, the interpolation method decides how to handle the gaps.")
+    st.write("- Linear: Draws a stright line between pillar datapoints.")
+    st.write("- Log_linear: Takes the log of the output values, linearly interpolates between them, and reverses the logarithms")
+    st.subheader("Dirty Price accumulation method")
+    st.write("The amount paid for a bond is the dirty price. When buying a bond between coupon issues, one must pay the immature coupon value. There are many ways this coupon value is calculated:")
+    st.write("- Linear: linearly increases accrued amount as time between passes between pillar times.")
+    st.write("- Log_linear: linearly increases the log of the accrued amount as time between passes between pillar times.")
+    st.write("- None: Does not accrue any interest.")
+    st.write("- Midpoint: Accrues half a full coupon every time.")
+    st.subheader("Face value")
+    st.write("The amount the will be paid at maturity. It is strongly advised to keep this parameter at 100.")
+    st.subheader("Frequency")
+    st.write("This bond exclusive parameter holds the coupon frequency of all bonds in the instrument list.")
+    st.write("The value inputted is the number of coupons issued per year.")
+    
+@st.dialog("Conventions Help")
+def helpBounds():
+    st.subheader("Discount factor bounds")
+    st.write("Here you can decide what to tolerate as the maximal and minimal discount factors of your curve are.")
+    st.write("Hard limits:")
+    st.write("- Upper bounds above 1.01 are never accepted. This is because the Time Value of Money says that the value of money should decrease with time")
+    st.write("- Lower bounds greater than upper bounds are never accepted. Illogical")
+    st.write("- Lower bounds less than or equal to zero are never accepted. Zero correlates to worthless money and negatives make no logical sense.")
+    st.subheader("Zero rate bounds")
+    st.write("Here you can decide what to tolerate as the maximal and minimal rates of your curve are.")
+    st.write("Hard limits:")
+    st.write("- Upper bounds above 0.50 are never accepted. Even hyperinflation markets scarcely go this high.")
+    st.write("- Lower bounds greater than upper bounds are never accepted. Illogical")
+    st.write("- Lower bounds less than are never accepted. This would correlate to discount factor > 1.")
+
 try:
     url = st.text_input("Enter url for csv containing bond data:","data/testbonds.csv")
     data = pd.read_csv(url, delimiter=",")
 except:
-    st.write("Unknown file: File by that name could not be found. Remember to add .csv to the end of your file name")
+    st.error("Unknown file: File by that name could not be found. Remember to add .csv to the end of your file name")
 
 st.header("Raw data")
 
-bonds = []
+Instruments = []
 st.write(data)
 earliest = date(2099, 12, 31)
 
@@ -44,16 +82,19 @@ for row in range(len(data)):
         earliest = mature_date
     
     inst = src.conventions.getInstrument(mature_date, rate, clean_price, settlement_date, type)
-    bonds.append(inst)
+    Instruments.append(inst)
 
 st.header("Parameters")
 tab1, tab2 = st.tabs(["Conventions","Bounds"])
-day_count = tab1.selectbox("Day Count Convention: (ZAR Government Bonds default to ACT/365F)",
+day_count = tab1.selectbox("Day Count Convention:",
 ["ACT/365F", "ACT/360", "30/360"])
 interpolation = tab1.selectbox("Graph Interpolation Method:", ["log_linear", "linear"])
 accruation = tab1.selectbox("Dirty Price interest accumulation method:", ["linear", "log_linear", "none", "midpoint"])
-face_val = tab1.number_input("Face value (treated as universal)",min_value=90.0,max_value=110.0, value=100.0)
-coupon_freq = tab1.number_input("Coupon issueing rate: (Issues per year)",min_value=1,max_value=12, value = 2)
+face_val = tab1.number_input("Face value:",min_value=90.0,max_value=110.0, value=100.0)
+coupon_freq = tab1.number_input("Frequency:",min_value=1,max_value=12, value = 2)
+helpConvs = tab1.button("Conventions help")
+if(helpConvs):
+    helpConventions()
 
 convs = src.conventions.getConventions(day_count, coupon_freq, interpolation, face_val, accruation)
 
@@ -61,25 +102,28 @@ df_upp = tab2.number_input("Maximum accepted discount factor", max_value=1.01, m
 df_low = tab2.number_input("Minimum accepted discount factor", max_value= df_upp, min_value=0.01)
 rates_upp = tab2.number_input("Maximum accepted zero rate", max_value=0.5, min_value=0.0, value = 0.25)
 rates_low = tab2.number_input("Minimum accepted zero rate", max_value=rates_upp, min_value=0.0)
+helpBnds = tab2.button("Bounds help")
+if(helpBnds):
+    helpBounds()
 
 bnds = src.conventions.getBounds(rates_low, rates_upp, df_low, df_upp)
 try:
-    dfs_data, dates, rates_data = bootstrap_govi_curve(bonds, conventions = convs, bounds = bnds)#
+    dfs_data, dates, rates_data = bootstrap_govi_curve(Instruments, conventions = convs, bounds = bnds)#
     dfs_curve = DiscountCurve(dfs_data, interpolation=convs["interpolation_method"], bounds=bnds)
 except Exception as e:
-    st.warning("An error occured during bootstrapping: " + str(e))
+    st.error("An error occured during bootstrapping: " + str(e))
 
 try:
     x,y = dfs_curve.plot()
 except Exception as e:
-    st.warning("Error occured while plotting Discount Factors" + str(e))
+    st.error("Error occured while plotting Discount Factors, " + str(e))
     x = []
     y = []
     passed = False
 try:
     x1, y1 = dfs_curve.plot_zero_rates()
 except Exception as e:
-    st.warning("An error occured while computing zero-rates, this usually means that the upper bound was exceeded. To prevent this, choose an earlier settlement date. "+ str(e))
+    st.error("An error occured while computing zero-rates, "+ str(e))
     x1 = []
     y1 = []
     passed = False
@@ -117,7 +161,7 @@ if(passed):
 
     st.download_button("Download curve as .csv", data=frame.to_csv().encode("utf-8"),file_name="bootstrapped_data.csv")
 else:
-    st.warning("Did not generate table due to failure to generate graph(s)")
+    st.error("Did not generate table due to failure to generate graph(s)")
 
 fn = 'Discount Curve.png'
 img = io.BytesIO()

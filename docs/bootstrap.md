@@ -31,19 +31,33 @@ FR = Forward rate; obtained through databases such as JIBAR
 YF = Year fraction
 
 # How to Bootstrap Swaps:
-The principle behind a swap is that one party is exchanging payments of fixed amount for payments of variable amounts. Swap prices are quoted such that the present value of both types are equal.
-$$PV_{fixed} = \text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right)$$
-$$PV_{var} = \sum_j (DF_j \times \text{Forward Rate}_{j-1\rightarrow j}\times \Delta t_j)$$
-$$PV_{fixed} = PV_{var} \implies \text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right) = \sum_j (DF_j \times \text{Forward Rate}_{j-1\rightarrow j}\times \Delta t_j)$$
+ The principle behind a swap is that one party is exchanging payments of fixed amount for payments of variable amounts. Swap prices are quoted such that the present value of both types are equal.
 
-As the forward rate is given by:
-$$\frac{\frac{DF_1}{DF_2}-1}{T_2-T_1}$$
-The equation simplifies to:
-$$PV_{fixed} = PV_{var} \implies \text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right) = \sum_j (\frac{DF_{j-1}-DF_j}{t_j-t_{j-1}}\times \Delta t_j)$$
-$$\text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right) = \sum_j (\frac{DF_{j-1}-DF_j}{\Delta t_j}\times \Delta t_j)$$
-$$\text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right) = \sum_j (DF_{j-1}-DF_j)$$
-$$\text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right) = DF_{start}-DF_{end}$$
+ ### Derivation of bootstrapping equation
+ $$PV_{fixed} = \text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right)$$
+ $$PV_{var} = \sum_j (DF_j \times \text{Forward Rate}_{j-1\rightarrow j}\times \Delta t_j)$$
+ $$PV_{fixed} = PV_{var} \implies \text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right) = \sum_j (DF_j \times \text{Forward Rate}_{j-1\rightarrow j}\times \Delta t_j)$$
+
+ As the forward rate is given by:
+ $$\frac{\frac{DF_1}{DF_2}-1}{T_2-T_1}$$
+ The equation simplifies to:
+ $$PV_{fixed} = PV_{var} \implies \text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right) = \sum_j (\frac{DF_{j-1}-DF_j}{t_j-t_{j-1}}\times \Delta t_j)$$
+ $$\text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right) = \sum_j (\frac{DF_{j-1}-DF_j}{\Delta t_j}\times \Delta t_j)$$
+ $$\text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right) = \sum_j (DF_{j-1}-DF_j)$$
+ $$\text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right) = DF_{start}-DF_{end}$$
+
+ Which when solved for $DF_{end}$, becomes the bootstrapping equation.
+
+ This formula unfortunately comes with a major problem. The equation used to calculate the forward rates is only accurate when considering simple interest. While there is nothing stopping us from using a more accurate formula such as the continuous compounding formula for forward rates, the issue becomes that no clean simplifications such as the ones in the above derivation occur. Thus, the final formula is drastically more complicated. As a consequence of this, the simplistic formula will be used.
+
+ ### Bootstrapping process
+ 1. Get the discount factors at the start of the swap and at every interest accumulation of the fixed interest payments throughout the swap.
+ 2. Get the swap rate, quoted directly from a database such as JIBAR.
+ 3. Calculate the time intervals between each interest payment of the fixed interest payments.
+ 4. Apply: $DF_{end} = DF_{start}-\text{Swap rate} \times \sum_i \left(DF_i \times \Delta t_i \right)$
+ 
 # Other Documents:
+
 previous : - [Bond Pricing](bond_pricing.md) - Cash flows, Coupon conevntions, clean/dirty prices 
  
 next: - [Architecture](architecture.md) - Basic architecture for Webapp and bootstrapping logic

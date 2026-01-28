@@ -165,8 +165,10 @@ def test_sample_dataset_regression():
     print("---------------")
     print(abs(rate_vals-exp_rates))
     
-    print(f"worst df, {max(abs(df_vals-exp_dfs))}")
-    print(f"worst rate, {max(abs(rate_vals-exp_rates))}")
+    print(f"worst absolute df error, {max(abs(df_vals-exp_dfs))}")
+    print(f"worst absolute zero rate error, {max(abs(rate_vals-exp_rates))}")
+    print(f"worst relative df error, {max(abs(df_vals-exp_dfs)/exp_dfs)}")
+    print(f"worst relative zero rate error, {max(abs(rate_vals-exp_rates)/exp_rates)}")
     
 def test_simple_bootstrap():
     """Test with known values"""
