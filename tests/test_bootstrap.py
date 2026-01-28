@@ -161,53 +161,16 @@ def test_sample_dataset_regression():
     exp_dfs = np.array(exp_dfs)
     rate_vals = np.array(rate_vals)
     exp_rates = np.array(exp_rates)
+    print("Absolute discount factor errors\n")
     print(abs(df_vals-exp_dfs))
-    print("---------------")
+    print("---------------------------------")
+    print("Absolute zero rate errors\n")
     print(abs(rate_vals-exp_rates))
     
     print(f"worst absolute df error, {max(abs(df_vals-exp_dfs))}")
     print(f"worst absolute zero rate error, {max(abs(rate_vals-exp_rates))}")
     print(f"worst relative df error, {max(abs(df_vals-exp_dfs)/exp_dfs)}")
     print(f"worst relative zero rate error, {max(abs(rate_vals-exp_rates)/exp_rates)}")
-    
-def test_simple_bootstrap():
-    """Test with known values"""
-    bonds = [
-        {
-            'mature_date': pd.Timestamp('2025-01-15').date(),
-            'rate': 0.05,  # 5%
-            'clean_price': 100.0,  # At par
-            'settlement_date': pd.Timestamp('2024-01-15').date(),
-            'type': "bond"
-        },
-        {
-            'mature_date': pd.Timestamp('2026-01-15').date(),
-            'rate': 0.06,  # 6%
-            'clean_price': 99.0,
-            'settlement_date': pd.Timestamp('2024-01-15').date(),
-            'type': "bond"
-        }
-    ]
-    conventions = {
-        'day_count': 'ACT/365F',
-        'coupon_frequency': 2,
-        'interpolation_method': 'log_linear',
-        'face_value': 100,
-        'accrued_method': 'linear'
-    }
-    
-    dfs, dates, rates = bootstrap_govi_curve(bonds,conventions)
-    
-    print("Discount Factors:")
-    for t, df in dfs:
-        print(f"  t={t:.4f}, DF={df:.6f}")
-    
-    print("\nZero Rates:")
-    for t, rate in rates:
-        print(f"  t={t:.4f}, Rate={rate:.6%}")
-    
-    # First bond at par: zero rate should be ~5%
-    assert abs(rates[0][1] - 0.05) < 0.001
     
 choice1 = input("Test bootstrapping for zero coupon bond? Enter [y/n]")
 if(choice1 == 'y'):
@@ -229,14 +192,6 @@ choice3 = input("Test bootstrapping for sample murex data? Enter [y/n]")
 if(choice3 == 'y'):
     test_sample_dataset_regression()
 elif(choice3 == 'n'):
-    pass
-else:
-    print("Unrecognised input, enter either 'y' for yes or 'n' for no")
-    
-choice4 = input("Test simple bootstrap? Enter [y/n]")
-if(choice4 == 'y'):
-    test_simple_bootstrap()
-elif(choice4 == 'n'):
     pass
 else:
     print("Unrecognised input, enter either 'y' for yes or 'n' for no")

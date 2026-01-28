@@ -5,12 +5,12 @@ from datetime import date
 from src.daycount import year_fraction
 
 def test():
-    s_year = int(input())
-    s_month = int(input())
-    s_day = int(input())
-    e_year = int(input())
-    e_month = int(input())
-    e_day = int(input())
+    s_year = int(input("Start year"))
+    s_month = int(input("Start month"))
+    s_day = int(input("Start day"))
+    e_year = int(input("End year"))
+    e_month = int(input("End month"))
+    e_day = int(input("End day"))
     StartDate = date(s_year, s_month, s_day)
     EndDate = date(e_year, e_month, e_day)
     print("ACT/365F:", year_fraction(StartDate, EndDate))

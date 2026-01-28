@@ -1,23 +1,20 @@
-Running either the test or the app requires running them from the appropriate file folder. If you want to switch from running a test to running the app or vice verse, remember to navigate to the parent directory first using:
+All programs should be run from the parent folder, which is where the directory will naturally land after following the steps of the README. However, if you enter a sub folder you can exit it by running
 
 `cd ..`
 
 # Run tests
 
-`cd tests`
-
 To test cashflow generation for bonds:
-`python test_bonds.py`
+`python tests\test_bonds.py`
 
 To test the output of year_fraction() for various **Day Count** conventions:
-`python test_daycount.py`
+`python tests\test_daycount.py`
 
 To test the validity of the bootstrapping against known data:
-`python test_bootstrap.py`
+`python tests\test_bootstrap.py`
 
 # Run app
-`cd app`
-`streamlit run app.py`
+`streamlit run app\app.py`
 
 # Project structure
 
@@ -52,6 +49,7 @@ repo/
     - dev_guide.md # This file - developer instructions
     - murex_validation.md # Validation against Murex
     - final_report.md # Project summary and lessons learned
+    - Day_11.md # Personal notes on swaps and FRAs
     - **Images used in docs**
 - tests/ # Test suite
     - test_daycount.py # Day count convention tests
