@@ -33,3 +33,6 @@ This project primarily provides a means through which bonds may be bootstrapped.
 - Improve csv importing system
 - Improve swap bootstrapping algorithm
 - Switch to Jacobian system
+
+# Other Documents
+previous - [Further notes](Day_11.md) - Personal notes on more complicated instruments than bonds.

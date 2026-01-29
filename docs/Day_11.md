@@ -61,3 +61,8 @@ and F(T1,T2) can be quoted from databases like JIBAR, thus we can simply conside
 $$
 DF(T2)= \frac{DF(T1)}{k\times (T2-T1) + 1}
 $$
+
+# Other Documents
+previous - [Murex Validation](murex_validation.md) -  Discussion of validation of bootstrapping algorithm relative to Murex results.
+
+next - [Final Report](docs/final_report.md)

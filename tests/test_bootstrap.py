@@ -13,7 +13,7 @@ def test_zero_coupon_bond():
     
     conventions = {
         'day_count': 'ACT/365F',
-        'coupon_frequency': 1,
+        'coupon_frequency': 2,
         'interpolation_method': 'log_linear',
         'face_value': 100,
         'accrued_method': 'linear'
@@ -34,6 +34,8 @@ def test_zero_coupon_bond():
     # DF at 1 year should be 0.95 (95/100)
     expected_df = 0.95
     actual_df = disCurve.calcDF(1.0)  # 1 year
+    print("Conventions used: \n", conventions, "\n")
+    print("\n Bonds used: \n", bonds, "\n")
     
     print(f"expected: {expected_df} actual: {actual_df}, absoulute error: {abs(expected_df-actual_df)}")
 
@@ -41,7 +43,7 @@ def test_two_par_bonds_flat_curve():
     """Two bonds at par should give flat zero curve"""
     conventions = {
         'day_count': 'ACT/365F',
-        'coupon_frequency': 1,
+        'coupon_frequency': 2,
         'interpolation_method': 'log_linear',
         'face_value': 100,
         'accrued_method': 'linear'
@@ -65,12 +67,14 @@ def test_two_par_bonds_flat_curve():
     
     known_dfs, dates, rates = bootstrap_govi_curve(bonds, conventions)
     times, dfs = zip(*known_dfs)
-    disCurve = DiscountCurve(known_dfs, interpolation=conventions["interpolation_method"])
-    
+    disCurve = DiscountCurve(known_dfs, interpolation=conventions["interpolation_method"])    
     
     # Zero rates should be ~5% at both maturities
     zero1 = rates[0][1]   # 1 year
     zero2 = rates[1][1]   # 2 years
+    
+    print("Conventions used: \n", conventions, "\n")
+    print("\n Bonds used: \n", bonds, "\n")
     
     # Should be close to 5% (allow for compounding differences)
     print(f"zero-rate after 1 year:{zero1} Expected: 0.05, absolute difference: {abs(zero1 - 0.05)}")

@@ -59,10 +59,12 @@ except:
     st.error("Unknown file: File by that name could not be found. Remember to add .csv to the end of your file name")
 
 st.header("Raw data")
+st.write("Expected column names: rate,clean_price,maturity_date,settlement_date,type")
+st.write("Expected date format: yyyy-mm-dd")
 
 Instruments = []
 st.write(data)
-earliest = date(2099, 12, 31)
+#earliest = date(2099, 12, 31)
 
 # Instrument creation.
 for row in range(len(data)):
@@ -73,13 +75,12 @@ for row in range(len(data)):
         mature_date = pd.Timestamp(data['maturity_date'][row]).date()
         settlement_date = pd.Timestamp(data['settlement_date'][row]).date()
     except:
-        st.write(f"Invalid date. Bootstrapping halted. Halted on line {row}")
-        st.write("At least 1 column was missing or had name mispelled.")
-        st.write("Expected format: 'maturity_date',coupon_rate','clean_price','settlement_date'")
+        st.write(f"Something went wrong. Halted on line {row}")
+        passed = False
         break
     
-    if(mature_date<earliest):
-        earliest = mature_date
+    #if(mature_date<earliest):
+    #    earliest = mature_date
     
     inst = src.conventions.getInstrument(mature_date, rate, clean_price, settlement_date, type)
     Instruments.append(inst)
@@ -123,7 +124,7 @@ except Exception as e:
 try:
     x1, y1 = dfs_curve.plot_zero_rates()
 except Exception as e:
-    st.error("An error occured while computing zero-rates, "+ str(e))
+    st.error("An error occured while plotting zero-rates, "+ str(e))
     x1 = []
     y1 = []
     passed = False
@@ -140,7 +141,7 @@ ax1.set_xlabel('Time since settlement date')
 ax1.grid(True)
 
 # Plot data on the second subplot (ax2)
-ax2.plot(x1, y1, 'r-') # 'r-' for a red line
+ax2.plot(x1, y1, 'r-')
 ax2.set_title('Zero Rates')
 ax2.set_ylabel('Zero Rate')
 ax2.set_xlabel('Time since settlement date')

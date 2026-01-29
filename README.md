@@ -17,35 +17,34 @@ This project provides the ability to run a local website for the bootstrapping o
 ### Installation
 
 1. Clone repository:
-```
-git clone https://github.com/T3nnysonz/zar-govi-curve.git
-cd zar-govi-curve
-```
+ ```
+ git clone https://github.com/T3nnysonz/zar-govi-curve.git
+ cd zar-govi-curve
+ ```
 
 2. Virtual Environment:
 
-On Windows:
-```
-python -m venv venv
-venv\Scripts\activate
-```
+ On Windows:
+ ```
+ python -m venv venv
+ venv\Scripts\activate
+ ```
 
-On Mac or Linux:
-```
-python -m venv venv
-source venv/bin/activate
-```
+ On Mac or Linux:
+ ```
+ python -m venv venv
+ source venv/bin/activate
+ ```
 
 3. Dependencies:
-```
-pip install -r requirements.txt
-```
+ ```
+ pip install -r requirements.txt
+ ```
 
 4. Run Demo:
-```
-cd app
-python app.py
-```
+ ```
+ streamlit run app\app.py
+ ```
 
 ## Documentation
 
@@ -57,3 +56,5 @@ python app.py
 - [Input format](docs/input_format.md) - Input format expected for bond list CSVs.
 - [Murex validation](docs/murex_validation) - Discussion of validation of bootstrapping algorithm relative to Murex results.
 - [Architecture](docs/architecture.md) - Overview of overall project architecture and logic flow.
+- [Notes](docs/Day_11.md) - Personal notes on instrument types.
+- [Final Report](docs/final_report.md)
